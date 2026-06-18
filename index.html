@@ -158,6 +158,7 @@
             <span class="calc-perguest">ca. <b id="budgetPerGuest">0&nbsp;€</b> pro Gast</span>
           </div>
           <div class="calc-bars" id="budgetBars"><!-- generiert per JS --></div>
+          <p class="calc-tip" id="budgetTip"><!-- Tipp per JS --></p>
           <a href="#kontakt" class="btn btn--gold calc-cta">Daraus einen echten Plan machen <span class="arr">→</span></a>
         </div>
       </div>
@@ -302,9 +303,14 @@
           </div>
         </div>
 
+        <div class="quiz-nav">
+          <button type="button" class="quiz-back" id="quizBack" hidden>← Eine Frage zurück</button>
+        </div>
+
         <!-- Ergebnis -->
         <div class="quiz-result" id="quizResult" hidden>
           <span class="eyebrow center">Euer Stil</span>
+          <span class="quiz-match" id="quizMatch"></span>
           <h3 class="quiz-result-title" id="quizResultTitle"></h3>
           <p class="quiz-result-text" id="quizResultText"></p>
           <div class="quiz-result-meta" id="quizResultMeta"></div>
@@ -323,12 +329,15 @@
       <div class="section-head center" data-reveal>
         <span class="eyebrow center">Interaktiv · Sitzplan-Planer</span>
         <h2 class="h2">Der Sitzplan, der sich fast von selbst löst.</h2>
-        <p>Probiert es aus: Tippt einen Gast an, dann einen Tisch — schon sitzt er. Heikle Kombinationen (etwa die geschiedenen Großeltern) erkennen wir und warnen euch. Oder lasst die KI in einem Klick alles ordnen.</p>
+        <p>Probiert es aus: Tippt einen Gast an, dann einen Tisch — schon sitzt er. Paare wie „Max &amp; Jana“ bleiben automatisch zusammen, heikle Kombinationen (etwa Papa und der neue Mann seiner Ex) werden erkannt und markiert. Oder lasst die KI in einem Klick alle 14 Gäste konfliktfrei verteilen.</p>
       </div>
 
       <div class="seat-tool" data-reveal data-delay="1">
         <div class="seat-side">
-          <h4 class="seat-h">Offene Gäste <span id="seatRemaining" class="seat-pill">0</span></h4>
+          <div class="seat-headrow">
+            <h4 class="seat-h">Offene Gäste <span id="seatRemaining" class="seat-pill">0</span></h4>
+            <span class="seat-conflicts" id="seatConflicts">0 Konflikte</span>
+          </div>
           <p class="seat-hint" id="seatHint">Gast antippen, dann einen Tisch wählen.</p>
           <div class="seat-pool" id="seatPool"><!-- Gäste per JS --></div>
           <div class="seat-actions">
@@ -336,6 +345,10 @@
             <button type="button" class="btn btn--ghost" id="seatReset">Zurücksetzen</button>
           </div>
           <p class="seat-status" id="seatStatus" aria-live="polite"></p>
+          <ul class="seat-legend">
+            <li><span class="lg-dot lg-together"></span>„↔“ markiert Paare, die zusammen sitzen — die KI hält sie beieinander.</li>
+            <li><span class="lg-dot lg-conflict"></span>„⚠“ warnt, wenn zwei Gäste besser nicht an einem Tisch sitzen.</li>
+          </ul>
         </div>
         <div class="seat-floor" id="seatTables"><!-- Tische per JS --></div>
       </div>
@@ -431,6 +444,21 @@
           <p>„Budget im Griff, Dienstleister gebucht, Zeitplan minutengenau. Wir konnten unseren Tag wirklich genießen, statt zu organisieren. Beste Entscheidung neben dem Antrag.“</p>
           <figcaption class="who"><i>A</i><div><b>Amir &amp; Theresa</b><span>Scheune im Spreewald</span></div></figcaption>
         </figure>
+        <figure class="quote" data-reveal>
+          <div class="stars">★★★★★</div>
+          <p>„Drei Wochen vor der Hochzeit sagten zwölf Gäste kurzfristig ab. Ein Klick — neuer Sitzplan, neue Tischkarten, fertig. Ohne Maison Amoré hätte ich geweint.“</p>
+          <figcaption class="who"><i>K</i><div><b>Karim &amp; Elif</b><span>Stadtpalais in Wien</span></div></figcaption>
+        </figure>
+        <figure class="quote" data-reveal data-delay="1">
+          <div class="stars">★★★★★</div>
+          <p>„Wir hatten nur vier Monate bis zum Wunschtermin. Die Timeline hat uns ehrlich gezeigt, was geht — und alles war pünktlich fertig. Entspannter als gedacht.“</p>
+          <figcaption class="who"><i>S</i><div><b>Sarah &amp; David</b><span>Olivenhain in der Toskana</span></div></figcaption>
+        </figure>
+        <figure class="quote" data-reveal data-delay="2">
+          <div class="stars">★★★★★</div>
+          <p>„Der Stil-Test hat einen wochenlangen Streit beendet. Plötzlich hatten wir eine gemeinsame Sprache für unsere Hochzeit — und sie wurde wunderschön.“</p>
+          <figcaption class="who"><i>M</i><div><b>Mara &amp; Felix</b><span>Loft in Zürich</span></div></figcaption>
+        </figure>
       </div>
     </div>
   </section>
@@ -520,6 +548,14 @@
         <div class="acc-item">
           <button type="button" class="acc-q">Was kostet die Planung selbst?<i></i></button>
           <div class="acc-a"><p>Der Einstieg ist kostenlos. Die vollständige digitale Planung gibt es zum einmaligen Festpreis, ganz ohne Stundensätze. Für die persönliche Rundum-Regie bucht ihr „Maison Privée“. Alle Preise findet ihr im Bereich Pakete.</p></div>
+        </div>
+        <div class="acc-item">
+          <button type="button" class="acc-q">Können wir auch nur einzelne Bausteine nutzen?<i></i></button>
+          <div class="acc-a"><p>Ja. Manche Paare lassen sich nur die Location-Suche oder den Sitzplan abnehmen, andere die komplette Organisation. Ihr startet kostenlos und entscheidet jederzeit, wie viel Maison Amoré übernehmen soll — ohne lange Bindung.</p></div>
+        </div>
+        <div class="acc-item">
+          <button type="button" class="acc-q">Wir planen eine internationale oder kulturell besondere Hochzeit — geht das?<i></i></button>
+          <div class="acc-a"><p>Absolut. Ob Mehrtagesfeier, freie Trauung, kirchlich, standesamtlich oder Hochzeiten mit zwei kulturellen Traditionen: Wir berücksichtigen Rituale, Sprachen, Speisevorschriften und Reiseanreisen eurer Gäste und bauen den Ablauf passend dazu.</p></div>
         </div>
       </div>
     </div>

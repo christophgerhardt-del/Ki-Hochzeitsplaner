@@ -521,7 +521,7 @@ input[type="date"]:focus { outline: none; border-color: var(--gold); }
 .seat-status { margin-top: 1rem; font-size: .85rem; min-height: 1.2em; color: var(--muted); }
 .seat-status.is-ok { color: #3f7a4f; }
 .seat-status.is-warn { color: var(--wine); }
-.seat-floor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+.seat-floor { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
 .seat-floor.just-arranged .table { animation: tablepop .6s var(--ease); }
 @keyframes tablepop { 0% { transform: scale(.96); } 60% { transform: scale(1.02); } 100% { transform: scale(1); } }
 .table {
@@ -557,3 +557,49 @@ input[type="date"]:focus { outline: none; border-color: var(--gold); }
   .bar-label { font-size: .76rem; }
   .seg-btn { flex: 1 1 100%; }
 }
+
+/* ================================================================
+   NEUE KOMPONENTEN — Schleife 3 (Tools robuster, Inhalt vertieft)
+   ================================================================ */
+
+/* aktive Navigation */
+.nav-links a.is-current { color: var(--ink); }
+.nav-links a.is-current::after { width: 100%; }
+
+/* Budget: Bereichsregler-Füllung & Tipp */
+input[type="range"] { background: linear-gradient(90deg, var(--gold), var(--gold-deep) 30%, var(--line) 30%); }
+.calc-tip {
+  margin-top: 1.4rem; font-size: .86rem; line-height: 1.55; color: var(--gold-deep);
+  background: rgba(176,141,87,.08); border-left: 2px solid var(--gold);
+  padding: .85rem 1.1rem; border-radius: 0 6px 6px 0;
+}
+
+/* Quiz: Zurück-Navigation & Treffer-Quote */
+.quiz-nav { padding: 0 clamp(2.2rem, 5vw, 3.6rem) 1.6rem; }
+.quiz-back {
+  font-size: .8rem; letter-spacing: .08em; color: rgba(250,246,239,.55);
+  transition: color .3s var(--ease); padding: .3rem 0;
+}
+.quiz-back:hover { color: var(--gold); }
+.quiz-match {
+  display: inline-block; margin-top: .4rem; font-size: .72rem; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--gold);
+}
+
+/* Sitzplan: Kopfzeile, Konfliktzähler, Paar-Hinweis, Legende */
+.seat-headrow { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+.seat-conflicts {
+  font-size: .7rem; letter-spacing: .04em; padding: .28rem .65rem; border-radius: 999px;
+  background: #e7f1ea; color: #3f7a4f; font-weight: 500; white-space: nowrap;
+  transition: background .3s, color .3s;
+}
+.seat-conflicts.is-bad { background: #f6e3e3; color: var(--wine); }
+.chip-note { font-size: .64rem; letter-spacing: .02em; color: var(--gold-deep); margin-top: .15rem; }
+.seat-legend {
+  list-style: none; margin: 1.2rem 0 0; padding: 1.2rem 0 0; border-top: 1px solid var(--line);
+  display: grid; gap: .6rem;
+}
+.seat-legend li { font-size: .78rem; color: var(--muted); line-height: 1.45; display: flex; gap: .55rem; align-items: flex-start; }
+.lg-dot { flex: none; width: .8rem; height: .8rem; border-radius: 3px; margin-top: .22rem; }
+.lg-together { background: var(--gold); }
+.lg-conflict { background: #e3bcbc; }

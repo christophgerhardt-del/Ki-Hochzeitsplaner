@@ -1,13 +1,15 @@
 /* =====================================================================
    Maison Amoré — Interaktion
    Inhalt:
-   1. Header / Scroll-Fortschritt / mobiles Menü
+   0. Hilfsfunktionen & Speicher (localStorage)
+   1. Header / Scroll-Fortschritt / mobiles Menü / aktive Navigation
    2. Scroll-Reveal & Zähler
    3. FAQ-Akkordeon
    4. Budget-Rechner
    5. Timeline-Generator
    6. Stil-Finder (Quiz)
    7. Sitzplan-Planer
+   8. Sanftes Scrollen
    ===================================================================== */
 (function () {
   "use strict";
@@ -15,6 +17,24 @@
   const $  = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
   const euro = (n) => Math.round(n).toLocaleString("de-DE") + " €";
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const reduceMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* =================================================== 0. Speicher */
+  // Tools merken sich die letzten Eingaben — beim nächsten Besuch fühlt es
+  // sich persönlich an. Läuft komplett im Browser, ohne Server.
+  const store = {
+    get(key, fallback) {
+      try {
+        const v = localStorage.getItem("ma_" + key);
+        return v == null ? fallback : JSON.parse(v);
+      } catch (e) { return fallback; }
+    },
+    set(key, val) {
+      try { localStorage.setItem("ma_" + key, JSON.stringify(val)); } catch (e) {}
+    }
+  };
 
   /* =================================================== 1. Header & Co. */
   const header = $("#header");
@@ -24,7 +44,7 @@
     if (header) header.classList.toggle("scrolled", y > 40);
     if (progress) {
       const h = document.documentElement.scrollHeight - window.innerHeight;
-      progress.style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
+      progress.style.transform = "scaleX(" + (h > 0 ? clamp(y / h, 0, 1) : 0) + ")";
     }
   };
   onScroll();
@@ -42,13 +62,47 @@
       if (e.target.tagName === "A") {
         document.body.classList.remove("menu-open");
         toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Menü öffnen");
+      }
+    });
+    // Escape schließt das mobile Menü
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && document.body.classList.contains("menu-open")) {
+        document.body.classList.remove("menu-open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.focus();
       }
     });
   }
 
+  // Aktiven Navigationspunkt hervorheben, je nachdem welcher Abschnitt sichtbar ist
+  (function activeNav() {
+    const navAnchors = $$('#navLinks a[href^="#"]');
+    if (!navAnchors.length || !("IntersectionObserver" in window)) return;
+    const map = {};
+    navAnchors.forEach((a) => {
+      const id = a.getAttribute("href").slice(1);
+      const sec = document.getElementById(id);
+      if (sec) map[id] = a;
+    });
+    const nav = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navAnchors.forEach((a) => a.classList.remove("is-current"));
+          const a = map[entry.target.id];
+          if (a) a.classList.add("is-current");
+        }
+      });
+    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+    Object.keys(map).forEach((id) => {
+      const sec = document.getElementById(id);
+      if (sec) nav.observe(sec);
+    });
+  })();
+
   /* =================================================== 2. Reveal & Zähler */
   const reveals = $$("[data-reveal]");
-  if ("IntersectionObserver" in window) {
+  if ("IntersectionObserver" in window && !reduceMotion) {
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) { entry.target.classList.add("in"); io.unobserve(entry.target); }
@@ -62,6 +116,7 @@
   const animateCount = (el) => {
     const target = parseInt(el.dataset.count, 10);
     const suffix = el.dataset.suffix || "";
+    if (reduceMotion) { el.textContent = target.toLocaleString("de-DE") + suffix; return; }
     const start = performance.now(), dur = 1600;
     const tick = (now) => {
       const p = Math.min((now - start) / dur, 1);
@@ -84,18 +139,37 @@
   }
 
   /* =================================================== 3. FAQ */
-  $$(".acc-q").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const item = btn.parentElement;
-      const answer = btn.nextElementSibling;
-      const isOpen = item.classList.contains("open");
-      $$(".acc-item.open").forEach((other) => {
-        if (other !== item) { other.classList.remove("open"); other.querySelector(".acc-a").style.maxHeight = null; }
+  (function faq() {
+    const items = $$(".acc-item");
+    const setHeight = (item, open) => {
+      const answer = item.querySelector(".acc-a");
+      if (!answer) return;
+      answer.style.maxHeight = open ? answer.scrollHeight + "px" : null;
+    };
+    items.forEach((item) => {
+      const btn = item.querySelector(".acc-q");
+      if (!btn) return;
+      btn.setAttribute("aria-expanded", "false");
+      btn.addEventListener("click", () => {
+        const isOpen = item.classList.contains("open");
+        items.forEach((other) => {
+          if (other !== item && other.classList.contains("open")) {
+            other.classList.remove("open");
+            other.querySelector(".acc-q").setAttribute("aria-expanded", "false");
+            setHeight(other, false);
+          }
+        });
+        item.classList.toggle("open", !isOpen);
+        btn.setAttribute("aria-expanded", String(!isOpen));
+        setHeight(item, !isOpen);
       });
-      item.classList.toggle("open", !isOpen);
-      answer.style.maxHeight = isOpen ? null : answer.scrollHeight + "px";
     });
-  });
+    // Höhe des offenen Items bei Größenänderung korrigieren
+    window.addEventListener("resize", () => {
+      const open = $(".acc-item.open");
+      if (open) setHeight(open, true);
+    }, { passive: true });
+  })();
 
   /* =================================================== 4. Budget-Rechner */
   (function budgetCalc() {
@@ -105,23 +179,46 @@
     const totalEl = $("#budgetTotal");
     const perGuestEl = $("#budgetPerGuest");
     const barsEl = $("#budgetBars");
-    let level = 1;     // 0 schlicht, 1 klassisch, 2 luxuriös
-    let region = 1;    // Multiplikator
+    const tipEl = $("#budgetTip");
+
+    // gespeicherte Werte laden
+    const saved = store.get("budget", null);
+    let level = saved && typeof saved.level === "number" ? saved.level : 1; // 0 schlicht, 1 klassisch, 2 luxuriös
+    let region = saved && typeof saved.region === "number" ? saved.region : 1;
+    if (saved && saved.guests) guests.value = clamp(saved.guests, +guests.min, +guests.max);
+
+    // aktive Buttons gemäß gespeicherter Auswahl setzen
+    $$("#budgetLevel .seg-btn").forEach((b) => {
+      const on = +b.dataset.level === level;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
+    $$("#budgetRegion .seg-btn").forEach((b) => {
+      const on = parseFloat(b.dataset.region) === region;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
 
     // [Basis, proGast] je Posten und Niveau
     const model = [
-      { label: "Location & Miete",        base: [2200, 4200, 8000], pg: [10, 20, 38] },
-      { label: "Catering & Getränke",     base: [600, 1000, 1600],  pg: [85, 125, 185] },
-      { label: "Foto & Video",            base: [1400, 2400, 4200], pg: [0, 2, 5] },
-      { label: "Floristik & Deko",        base: [700, 1600, 3400],  pg: [6, 12, 24] },
-      { label: "Musik / DJ / Band",       base: [800, 1600, 3600],  pg: [0, 1, 3] },
-      { label: "Outfits & Beauty",        base: [1200, 2400, 4800], pg: [0, 0, 2] },
-      { label: "Trauung & Redner",        base: [350, 650, 1300],   pg: [0, 0, 1] },
-      { label: "Papeterie & Sonstiges",   base: [400, 800, 1600],   pg: [7, 12, 20] }
+      { label: "Location & Miete",      base: [2200, 4200, 8000], pg: [10, 20, 38] },
+      { label: "Catering & Getränke",   base: [600, 1000, 1600],  pg: [85, 125, 185] },
+      { label: "Foto & Video",          base: [1400, 2400, 4200], pg: [0, 2, 5] },
+      { label: "Floristik & Deko",      base: [700, 1600, 3400],  pg: [6, 12, 24] },
+      { label: "Musik / DJ / Band",     base: [800, 1600, 3600],  pg: [0, 1, 3] },
+      { label: "Outfits & Beauty",      base: [1200, 2400, 4800], pg: [0, 0, 2] },
+      { label: "Trauung & Redner",      base: [350, 650, 1300],   pg: [0, 0, 1] },
+      { label: "Papeterie & Sonstiges", base: [400, 800, 1600],   pg: [7, 12, 20] }
+    ];
+
+    const tips = [
+      "Tipp: An einem Freitag oder unter der Woche heiraten spart bei Location und Dienstleistern oft 15–25 %.",
+      "Tipp: Die Gästezahl ist der größte Hebel. Jeder Gast kostet vor allem im Catering — eine kleinere Feier wirkt schnell.",
+      "Tipp: Plant 5–10 % Puffer für Unvorhergesehenes ein. Maison Amoré warnt euch früh vor versteckten Kosten."
     ];
 
     function compute() {
-      const g = parseInt(guests.value, 10);
+      const g = clamp(parseInt(guests.value, 10) || 0, 1, 999);
       let total = 0;
       const rows = model.map((m) => {
         const val = (m.base[level] + m.pg[level] * g) * region;
@@ -131,35 +228,55 @@
       return { g, total, rows };
     }
 
+    function paintRange() {
+      const min = +guests.min, max = +guests.max;
+      const pct = ((clamp(+guests.value, min, max) - min) / (max - min)) * 100;
+      guests.style.background =
+        "linear-gradient(90deg, var(--gold) 0%, var(--gold-deep) " + pct + "%, var(--line) " + pct + "%)";
+    }
+
     function render() {
       const { g, total, rows } = compute();
       guestsVal.textContent = g;
+      paintRange();
       animateNumber(totalEl, total, (v) => euro(v));
-      perGuestEl.textContent = euro(total / g);
-      const max = Math.max.apply(null, rows.map((r) => r.val));
+      perGuestEl.textContent = euro(g ? total / g : 0);
+
+      const max = Math.max.apply(null, rows.map((r) => r.val)) || 1;
       barsEl.innerHTML = rows
+        .slice()
         .sort((a, b) => b.val - a.val)
-        .map((r) => `
+        .map((r) => {
+          const pct = (r.val / max * 100).toFixed(1);
+          return `
           <div class="bar-row">
             <span class="bar-label">${r.label}</span>
-            <span class="bar-track"><span class="bar-fill" style="width:${(r.val / max * 100).toFixed(1)}%"></span></span>
+            <span class="bar-track"><span class="bar-fill" style="width:0" data-w="${pct}"></span></span>
             <span class="bar-val">${euro(r.val)}</span>
-          </div>`).join("");
-      // Balken nach dem Einfügen animieren
-      requestAnimationFrame(() => $$(".bar-fill", barsEl).forEach((f) => f.classList.add("grown")));
+          </div>`;
+        }).join("");
+
+      // Balken nach dem Einfügen wachsen lassen (zwei Frames = saubere Transition)
+      const grow = () => $$(".bar-fill", barsEl).forEach((f) => { f.style.width = f.dataset.w + "%"; });
+      if (reduceMotion) grow();
+      else requestAnimationFrame(() => requestAnimationFrame(grow));
+
+      if (tipEl) tipEl.textContent = tips[level];
+
+      store.set("budget", { guests: g, level, region });
     }
 
     // sanftes Hochzählen für die Gesamtsumme
     let numRAF;
     function animateNumber(el, to, fmt) {
+      if (reduceMotion) { el.textContent = fmt(to); el.dataset.cur = to; return; }
       const from = parseFloat(el.dataset.cur || "0");
       const start = performance.now(), dur = 500;
       cancelAnimationFrame(numRAF);
       const step = (now) => {
         const p = Math.min((now - start) / dur, 1);
         const eased = 1 - Math.pow(1 - p, 3);
-        const cur = from + (to - from) * eased;
-        el.textContent = fmt(cur);
+        el.textContent = fmt(from + (to - from) * eased);
         if (p < 1) numRAF = requestAnimationFrame(step);
         else el.dataset.cur = to;
       };
@@ -170,13 +287,21 @@
     $("#budgetLevel").addEventListener("click", (e) => {
       const b = e.target.closest("[data-level]"); if (!b) return;
       level = parseInt(b.dataset.level, 10);
-      $$("#budgetLevel .seg-btn").forEach((x) => x.classList.toggle("is-active", x === b));
+      $$("#budgetLevel .seg-btn").forEach((x) => {
+        const on = x === b;
+        x.classList.toggle("is-active", on);
+        x.setAttribute("aria-pressed", String(on));
+      });
       render();
     });
     $("#budgetRegion").addEventListener("click", (e) => {
       const b = e.target.closest("[data-region]"); if (!b) return;
       region = parseFloat(b.dataset.region);
-      $$("#budgetRegion .seg-btn").forEach((x) => x.classList.toggle("is-active", x === b));
+      $$("#budgetRegion .seg-btn").forEach((x) => {
+        const on = x === b;
+        x.classList.toggle("is-active", on);
+        x.setAttribute("aria-pressed", String(on));
+      });
       render();
     });
 
@@ -190,12 +315,19 @@
     const countEl = $("#timelineCountdown");
     const listEl = $("#timelineList");
 
-    // Vorbelegung: nächster Samstag in ~14 Monaten
-    const seed = new Date();
-    seed.setMonth(seed.getMonth() + 14);
-    seed.setDate(seed.getDate() + ((6 - seed.getDay() + 7) % 7));
-    input.value = seed.toISOString().slice(0, 10);
-    input.min = new Date().toISOString().slice(0, 10);
+    const todayISO = new Date().toISOString().slice(0, 10);
+    input.min = todayISO;
+
+    // Vorbelegung: gespeichertes Datum oder nächster Samstag in ~14 Monaten
+    const savedDate = store.get("weddingDate", null);
+    if (savedDate && savedDate >= todayISO) {
+      input.value = savedDate;
+    } else {
+      const seed = new Date();
+      seed.setMonth(seed.getMonth() + 14);
+      seed.setDate(seed.getDate() + ((6 - seed.getDay() + 7) % 7));
+      input.value = seed.toISOString().slice(0, 10);
+    }
 
     // Meilensteine: Monate vor der Hochzeit, Titel, Beschreibung
     const milestones = [
@@ -216,12 +348,22 @@
     function render() {
       const wedding = new Date(input.value + "T00:00:00");
       if (isNaN(wedding)) return;
+      store.set("weddingDate", input.value);
+
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const days = Math.round((wedding - today) / DAY);
+      const openCount = milestones.filter((ms) => {
+        const due = new Date(wedding); due.setMonth(due.getMonth() - ms.m);
+        return ms.m !== 0 && due >= today;
+      }).length;
 
-      if (days >= 0) {
+      if (days > 0) {
         const months = Math.floor(days / 30.44);
-        countEl.innerHTML = `<b>${days.toLocaleString("de-DE")}</b><span>Tage bis zum „Ja“ &nbsp;·&nbsp; rund ${months} Monate</span>`;
+        countEl.innerHTML =
+          `<b>${days.toLocaleString("de-DE")}</b>` +
+          `<span>Tage bis zum „Ja“ &nbsp;·&nbsp; rund ${months} Monate &nbsp;·&nbsp; ${openCount} Etappen vor euch</span>`;
+      } else if (days === 0) {
+        countEl.innerHTML = `<b>Heute!</b><span>Heute ist euer großer Tag — von Herzen alles Liebe. ♥</span>`;
       } else {
         countEl.innerHTML = `<b>♥</b><span>Dieser Tag liegt in der Vergangenheit — wir hoffen, er war wunderschön.</span>`;
       }
@@ -250,15 +392,16 @@
 
   /* =================================================== 6. Stil-Finder */
   (function quiz() {
-    const quiz = $("#quiz");
-    if (!quiz) return;
-    const steps = $$(".quiz-step", quiz);
+    const quizEl = $("#quiz");
+    if (!quizEl) return;
+    const steps = $$(".quiz-step", quizEl);
     const bar = $("#quizProgressBar");
     const stage = $("#quizStage");
     const result = $("#quizResult");
+    const backBtn = $("#quizBack");
     const total = steps.length;
     let current = 0;
-    let scores = {};
+    let answers = []; // gewählter Stil je Frage
 
     const styles = {
       boho: {
@@ -282,35 +425,65 @@
         meta: ["Location: Scheune, Weingut, Berghütte", "Farben: Eukalyptus · Naturholz · Warmweiß", "Deko: Holztische, Greenery, Glühbirnen"]
       }
     };
+    // Reihenfolge entscheidet Gleichstände (oben gewinnt)
+    const priority = ["klassisch", "boho", "rustikal", "modern"];
+
+    function updateProgress() {
+      // Fortschritt = beantwortete bzw. aktuelle Frage von gesamt
+      const done = result.hidden ? current : total;
+      bar.style.width = (done / total * 100) + "%";
+    }
 
     function show(i) {
       steps.forEach((s, idx) => s.classList.toggle("is-active", idx === i));
-      bar.style.width = (i / total * 100) + "%";
+      if (backBtn) backBtn.hidden = i === 0;
+      updateProgress();
+      const active = steps[i];
+      if (active) {
+        const first = active.querySelector(".quiz-opt");
+        if (first && !reduceMotion) first.focus({ preventScroll: true });
+      }
     }
 
     function finish() {
-      const winner = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0] || "klassisch";
+      const scores = {};
+      answers.forEach((st) => { scores[st] = (scores[st] || 0) + 1; });
+      let best = -1, winner = priority[0];
+      priority.forEach((st) => {
+        const sc = scores[st] || 0;
+        if (sc > best) { best = sc; winner = st; }
+      });
       const s = styles[winner];
+      const match = Math.round((best / total) * 100);
       $("#quizResultTitle").textContent = s.title;
       $("#quizResultText").textContent = s.text;
       $("#quizResultMeta").innerHTML = s.meta.map((m) => `<span>${m}</span>`).join("");
-      bar.style.width = "100%";
+      const matchEl = $("#quizMatch");
+      if (matchEl) matchEl.textContent = match + "% Übereinstimmung";
+      if (backBtn) backBtn.hidden = true;
       stage.hidden = true;
       result.hidden = false;
+      updateProgress();
+      store.set("quizStyle", winner);
     }
 
-    $$(".quiz-opt", quiz).forEach((opt) => {
+    $$(".quiz-opt", quizEl).forEach((opt) => {
       opt.addEventListener("click", () => {
-        const st = opt.dataset.style;
-        scores[st] = (scores[st] || 0) + 1;
+        answers[current] = opt.dataset.style;
         current++;
         if (current >= total) finish();
         else show(current);
       });
     });
 
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        if (current > 0) { current--; show(current); }
+      });
+    }
+
     $("#quizRestart").addEventListener("click", () => {
-      scores = {}; current = 0;
+      answers = []; current = 0;
       result.hidden = true; stage.hidden = false;
       show(0);
     });
@@ -326,50 +499,79 @@
     const statusEl = $("#seatStatus");
     const remainingEl = $("#seatRemaining");
     const hintEl = $("#seatHint");
+    const conflictEl = $("#seatConflicts");
 
-    // Gäste mit Gruppe; Konflikte = Paare, die nicht an denselben Tisch sollen
+    // Gäste mit Gruppe
     const guests = [
-      { id: "g1",  name: "Oma Erika",     grp: "Familie Braut" },
-      { id: "g2",  name: "Opa Klaus",     grp: "Familie Braut" },
-      { id: "g3",  name: "Mama Susanne",  grp: "Familie Braut" },
-      { id: "g4",  name: "Papa Bernd",    grp: "Familie Braut" },
-      { id: "g5",  name: "Tante Rita",    grp: "Familie Bräutigam" },
-      { id: "g6",  name: "Onkel Dieter",  grp: "Familie Bräutigam" },
-      { id: "g7",  name: "Lisa (BFF)",    grp: "Freunde" },
-      { id: "g8",  name: "Max & Jana",    grp: "Freunde" },
-      { id: "g9",  name: "Kollege Tom",   grp: "Arbeit" },
-      { id: "g10", name: "Cousine Mia",   grp: "Familie Braut" },
-      { id: "g11", name: "Sven (Ex-Mann)",grp: "Familie Bräutigam" },
-      { id: "g12", name: "DJ-Freund Ali", grp: "Freunde" }
+      { id: "g1",  name: "Oma Erika",       grp: "Familie Braut" },
+      { id: "g2",  name: "Opa Klaus",       grp: "Familie Braut" },
+      { id: "g3",  name: "Mama Susanne",    grp: "Familie Braut" },
+      { id: "g4",  name: "Papa Bernd",      grp: "Familie Braut" },
+      { id: "g5",  name: "Cousine Mia",     grp: "Familie Braut" },
+      { id: "g6",  name: "Tante Rita",      grp: "Familie Bräutigam" },
+      { id: "g7",  name: "Onkel Dieter",    grp: "Familie Bräutigam" },
+      { id: "g8",  name: "Stiefvater Frank",grp: "Familie Bräutigam" },
+      { id: "g9",  name: "Lisa (Trauzeugin)", grp: "Freunde" },
+      { id: "g10", name: "Max",             grp: "Freunde" },
+      { id: "g11", name: "Jana",            grp: "Freunde" },
+      { id: "g12", name: "DJ-Freund Ali",   grp: "Freunde" },
+      { id: "g13", name: "Kollege Tom",     grp: "Arbeit" },
+      { id: "g14", name: "Kollegin Nina",   grp: "Arbeit" }
     ];
-    // Konflikt: geschiedene Großeltern & Ex-Partner nicht mit bestimmten Personen
-    const conflicts = [ ["g2", "g11"], ["g4", "g11"], ["g5", "g11"] ];
+    // Konflikte: sollten NICHT am selben Tisch sitzen (z. B. zerstrittene Familie)
+    const conflicts = [ ["g4", "g8"], ["g1", "g8"], ["g2", "g8"] ];
+    // Paare, die zusammen sitzen MÜSSEN
+    const togetherPairs = [ ["g10", "g11"] ];
 
     const tables = [
       { id: "t1", name: "Tisch 1 · Familie", cap: 4 },
       { id: "t2", name: "Tisch 2 · Familie", cap: 4 },
-      { id: "t3", name: "Tisch 3 · Freunde", cap: 4 }
+      { id: "t3", name: "Tisch 3 · Freunde", cap: 4 },
+      { id: "t4", name: "Tisch 4 · Bunt",    cap: 4 }
     ];
 
     let seatMap = {};      // guestId -> tableId
     let selected = null;   // ausgewählter Gast
 
+    const byId = (id) => guests.find((g) => g.id === id);
+    const tableCount = (tId) => Object.values(seatMap).filter((v) => v === tId).length;
+
+    function partnersOf(id) {
+      const out = [];
+      togetherPairs.forEach(([a, b]) => {
+        if (a === id) out.push(b);
+        if (b === id) out.push(a);
+      });
+      return out;
+    }
+
     function conflictAt(tableId, guestId) {
-      const here = Object.keys(seatMap).filter((g) => seatMap[g] === tableId);
+      const here = Object.keys(seatMap).filter((g) => seatMap[g] === tableId && g !== guestId);
       return conflicts.some(([a, b]) =>
         (a === guestId && here.includes(b)) || (b === guestId && here.includes(a)));
     }
 
+    function countConflicts() {
+      let n = 0;
+      guests.forEach((g) => { if (seatMap[g.id] && conflictAt(seatMap[g.id], g.id)) n++; });
+      return n / 2; // jedes Paar doppelt gezählt
+    }
+
     function render() {
-      // Pool
       const open = guests.filter((g) => !seatMap[g.id]);
       remainingEl.textContent = open.length;
-      pool.innerHTML = open.map((g) => `
-        <button type="button" class="chip ${selected === g.id ? "is-selected" : ""}" data-guest="${g.id}">
-          <span class="chip-name">${g.name}</span><span class="chip-grp">${g.grp}</span>
-        </button>`).join("") || `<p class="seat-empty">Alle Gäste sitzen. 🎉</p>`;
 
-      // Tische
+      pool.innerHTML = open.length
+        ? open.map((g) => {
+            const mate = partnersOf(g.id).map(byId).filter(Boolean).map((p) => p.name);
+            const note = mate.length ? `<span class="chip-note">↔ mit ${mate.join(", ")}</span>` : "";
+            return `
+              <button type="button" class="chip ${selected === g.id ? "is-selected" : ""}" data-guest="${g.id}">
+                <span class="chip-name">${g.name}</span><span class="chip-grp">${g.grp}</span>${note}
+              </button>`;
+          }).join("")
+        : `<p class="seat-empty">Alle Gäste sitzen. 🎉</p>`;
+
       floor.innerHTML = tables.map((t) => {
         const seated = guests.filter((g) => seatMap[g.id] === t.id);
         const seats = seated.map((g) => {
@@ -384,9 +586,15 @@
               <span class="table-name">${t.name}</span>
               <span class="table-cap">${seated.length}/${t.cap}</span>
             </div>
-            <div class="table-seats">${seats || '<span class="table-empty">frei</span>'}</div>
+            <div class="table-seats">${seats || '<span class="table-empty">frei — Gast hierher setzen</span>'}</div>
           </div>`;
       }).join("");
+
+      if (conflictEl) {
+        const c = countConflicts();
+        conflictEl.textContent = c === 0 ? "0 Konflikte" : (c + (c === 1 ? " Konflikt" : " Konflikte"));
+        conflictEl.classList.toggle("is-bad", c > 0);
+      }
     }
 
     function setStatus(msg, type) {
@@ -400,7 +608,7 @@
       const id = chip.dataset.guest;
       selected = selected === id ? null : id;
       hintEl.textContent = selected
-        ? guests.find((g) => g.id === selected).name + " gewählt — jetzt einen Tisch antippen."
+        ? byId(selected).name + " gewählt — jetzt einen Tisch antippen."
         : "Gast antippen, dann einen Tisch wählen.";
       setStatus("");
       render();
@@ -420,14 +628,23 @@
       if (!selected) { setStatus("Erst links einen Gast antippen.", "warn"); return; }
       const tId = table.dataset.table;
       const t = tables.find((x) => x.id === tId);
-      const seatedCount = Object.values(seatMap).filter((v) => v === tId).length;
-      if (seatedCount >= t.cap) { setStatus(t.name + " ist schon voll.", "warn"); return; }
+      if (tableCount(tId) >= t.cap) { setStatus(t.name + " ist schon voll.", "warn"); return; }
 
       const willConflict = conflictAt(tId, selected);
+      const name = byId(selected).name;
       seatMap[selected] = tId;
-      const name = guests.find((g) => g.id === selected).name;
+
+      // Partner möglichst gleich mitsetzen
+      const mates = partnersOf(selected).filter((m) => !seatMap[m]);
+      let movedMate = null;
+      mates.forEach((m) => {
+        if (tableCount(tId) < t.cap) { seatMap[m] = tId; movedMate = byId(m).name; }
+      });
+
       if (willConflict) {
         setStatus("⚠ Heikel: " + name + " sollte hier besser nicht sitzen — wir haben es markiert.", "warn");
+      } else if (movedMate) {
+        setStatus(name + " & " + movedMate + " sitzen zusammen an „" + t.name + "“.", "ok");
       } else {
         setStatus(name + " sitzt an „" + t.name + "“.", "ok");
       }
@@ -436,33 +653,53 @@
       render();
     });
 
-    // KI ordnet automatisch — konfliktfrei, gruppenweise
+    // KI ordnet automatisch — Paare zusammen, konfliktfrei, gruppenweise
     $("#seatAuto").addEventListener("click", () => {
       seatMap = {}; selected = null;
+
+      // Einheiten bilden (zusammengehörige Gäste verschmelzen) via Union-Find
+      const parent = {};
+      guests.forEach((g) => { parent[g.id] = g.id; });
+      const find = (x) => (parent[x] === x ? x : (parent[x] = find(parent[x])));
+      togetherPairs.forEach(([a, b]) => { parent[find(a)] = find(b); });
+      const unitMap = {};
+      guests.forEach((g) => { const r = find(g.id); (unitMap[r] = unitMap[r] || []).push(g); });
       // nach Gruppe sortieren, damit Familien zusammen sitzen
-      const ordered = guests.slice().sort((a, b) => a.grp.localeCompare(b.grp));
-      ordered.forEach((g) => {
-        // ersten Tisch suchen, der Platz hat UND keinen Konflikt erzeugt
-        let placed = false;
-        for (const t of tables) {
-          const cnt = Object.values(seatMap).filter((v) => v === t.id).length;
-          if (cnt < t.cap && !conflictAt(t.id, g.id)) { seatMap[g.id] = t.id; placed = true; break; }
-        }
-        // falls nirgends konfliktfrei: trotzdem ersten freien Platz nehmen
-        if (!placed) {
-          for (const t of tables) {
-            const cnt = Object.values(seatMap).filter((v) => v === t.id).length;
-            if (cnt < t.cap) { seatMap[g.id] = t.id; break; }
-          }
-        }
+      const units = Object.values(unitMap)
+        .sort((a, b) => a[0].grp.localeCompare(b[0].grp));
+
+      const unitConflicts = (tId, members) =>
+        members.some((g) => conflictAt(tId, g.id));
+
+      units.forEach((members) => {
+        const size = members.length;
+        const place = (tId) => members.forEach((g) => { seatMap[g.id] = tId; });
+        // 1. Tisch mit Platz UND ohne Konflikt
+        let target = tables.find((t) => (t.cap - tableCount(t.id)) >= size && !unitConflicts(t.id, members));
+        // 2. sonst irgendein Tisch mit Platz
+        if (!target) target = tables.find((t) => (t.cap - tableCount(t.id)) >= size);
+        // 3. notfalls einzeln verteilen
+        if (target) place(target.id);
+        else members.forEach((g) => {
+          const t = tables.find((x) => tableCount(x.id) < x.cap);
+          if (t) seatMap[g.id] = t.id;
+        });
       });
+
       const openLeft = guests.filter((g) => !seatMap[g.id]).length;
-      setStatus(openLeft
-        ? "KI-Vorschlag erstellt — " + openLeft + " Gäste passen nicht mehr an die 3 Demo-Tische (mehr Tische = alle sitzen)."
-        : "✦ Fertig: Alle Gäste konfliktfrei platziert — Familien zusammen, heikle Paare getrennt.", "ok");
+      const c = countConflicts();
+      if (openLeft) {
+        setStatus("KI-Vorschlag erstellt — " + openLeft + " Gäste passen nicht mehr an die Demo-Tische. In der echten Planung legen wir einfach weitere Tische an.", "warn");
+      } else if (c > 0) {
+        setStatus("Fast perfekt: alle sitzen, aber " + c + (c === 1 ? " Konstellation ließ" : " Konstellationen ließen") + " sich an so wenigen Tischen nicht ganz vermeiden — markiert.", "warn");
+      } else {
+        setStatus("✦ Fertig: Alle Gäste konfliktfrei platziert — Paare zusammen, Familien beieinander, heikle Paare getrennt.", "ok");
+      }
       hintEl.textContent = "Tipp: Einzelne Gäste antippen zum Entfernen, dann neu setzen.";
-      floor.classList.add("just-arranged");
-      setTimeout(() => floor.classList.remove("just-arranged"), 700);
+      if (!reduceMotion) {
+        floor.classList.add("just-arranged");
+        setTimeout(() => floor.classList.remove("just-arranged"), 700);
+      }
       render();
     });
 
@@ -476,13 +713,16 @@
     render();
   })();
 
-  /* =================================================== Sanftes Scrollen */
+  /* =================================================== 8. Sanftes Scrollen */
   $$('a[href^="#"]').forEach((a) => {
     a.addEventListener("click", (e) => {
       const id = a.getAttribute("href");
       if (id.length > 1) {
         const el = $(id);
-        if (el) { e.preventDefault(); el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+        }
       }
     });
   });
