@@ -697,3 +697,102 @@ body.seat-dragging * { cursor: grabbing !important; }
   .venue-floor { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   .rtable { width: 150px; height: 150px; }
 }
+
+/* ================================================================
+   NEUE KOMPONENTEN — Schleife 5 (Saal: Tanzfläche, Stationen, Extras)
+   ================================================================ */
+
+/* Oberer Saalbereich: Brauttisch + DJ nebeneinander */
+.venue-top { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
+.venue-top .venue-stage { flex: 1 1 58%; margin-bottom: 0; display: flex; flex-direction: column; justify-content: center; }
+.venue-dj { flex: 1 1 30%; flex-direction: column; gap: .2rem; }
+.venue-dj b { font-size: 1.4rem; }
+
+/* Stationen (Bar, Buffet, …) */
+.venue-stations { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; margin-top: 1.8rem; }
+.venue-spot {
+  display: inline-flex; align-items: center; gap: .45rem; padding: .5rem .95rem;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--paper);
+  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.venue-spot b { font-style: normal; font-size: 1rem; }
+
+/* Tanzfläche (Parkett) */
+.venue-dancefloor {
+  margin: 1.6rem auto; max-width: 62%; height: 70px; border-radius: 10px; position: relative;
+  display: grid; place-items: center;
+  background:
+    repeating-linear-gradient(45deg, rgba(176,141,87,.20) 0 11px, rgba(176,141,87,.06) 11px 22px);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 0 34px rgba(176,141,87,.16);
+}
+.venue-dancefloor::after {
+  content: ""; position: absolute; inset: 0; border-radius: 10px; pointer-events: none;
+  background: radial-gradient(60% 80% at 50% 50%, rgba(255,255,255,.5), transparent 70%);
+}
+.venue-dancefloor span {
+  position: relative; z-index: 1; font-size: .7rem; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--gold-deep); font-weight: 500;
+}
+
+/* Tischgröße einstellen & Tisch entfernen */
+.rtable-size { display: inline-flex; align-items: center; gap: .35rem; margin-top: .15rem; }
+.rtable-size button {
+  width: 1.3rem; height: 1.3rem; border-radius: 50%; border: 1px solid var(--line);
+  font-size: .9rem; line-height: 1; color: var(--gold-deep); background: var(--paper);
+  display: grid; place-items: center; transition: border-color .25s, background .25s;
+}
+.rtable-size button:hover { border-color: var(--gold); background: var(--cream); }
+.rtable-del {
+  position: absolute; top: 0; right: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--line); color: var(--wine);
+  font-size: .8rem; line-height: 1; display: none; place-items: center; z-index: 4;
+}
+.rtable:hover .rtable-del { display: grid; }
+.rtable-del:hover { border-color: var(--wine); background: #f6e3e3; }
+
+/* Eigenen Gast hinzufügen */
+.seat-add { display: flex; gap: .5rem; margin-top: 1rem; }
+.seat-add input {
+  flex: 1; min-width: 0; padding: .6rem .85rem; border: 1px solid var(--line);
+  border-radius: 999px; background: var(--paper); font: inherit; font-size: .85rem; color: var(--ink);
+}
+.seat-add input:focus { outline: none; border-color: var(--gold); }
+.seat-add .btn { padding: .6rem 1rem; white-space: nowrap; }
+
+/* Drucken */
+.seat-print {
+  margin-top: 1rem; width: 100%; padding: .65rem; border: 1px dashed var(--line); border-radius: 8px;
+  font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-deep);
+  transition: border-color .25s, color .25s;
+}
+.seat-print:hover { border-color: var(--gold); color: var(--ink); }
+
+/* Konfetti */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 400; overflow: hidden; }
+.confetti i {
+  position: absolute; top: -12px; width: 9px; height: 15px; border-radius: 2px; opacity: .92;
+  animation: confettifall 2.4s var(--ease) forwards;
+}
+@keyframes confettifall {
+  0%   { transform: translateY(-12px) rotate(0); opacity: 1; }
+  100% { transform: translateY(104vh) rotate(560deg); opacity: .9; }
+}
+
+@media (max-width: 760px) {
+  .venue-dancefloor { max-width: 85%; }
+  .venue-top { flex-direction: column; }
+}
+
+/* Druckansicht: nur der Saal */
+@media print {
+  body * { visibility: hidden; }
+  #sitzplan, #sitzplan * { visibility: visible; }
+  #sitzplan { position: absolute; left: 0; top: 0; width: 100%; padding: 0; }
+  .seat-side, .seat-print, .rtable-del, .rtable-size { display: none !important; }
+  .seat-tool { display: block; }
+  .venue { box-shadow: none; border: none; }
+  .venue, .rtable-disc, .pseat-ini, .venue-dancefloor, .venue-stage, .venue-spot {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+}

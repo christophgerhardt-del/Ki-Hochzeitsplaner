@@ -340,6 +340,10 @@
           </div>
           <p class="seat-hint" id="seatHint">Gast greifen und auf einen Tisch ziehen — oder antippen, dann Tisch wählen.</p>
           <div class="seat-pool" id="seatPool"><!-- Gäste per JS --></div>
+          <div class="seat-add">
+            <input type="text" id="seatNewName" placeholder="Eigenen Gast hinzufügen…" maxlength="28" aria-label="Eigenen Gast hinzufügen" />
+            <button type="button" class="btn btn--ghost" id="seatAddGuest">+ Gast</button>
+          </div>
           <div class="seat-actions">
             <button type="button" class="btn btn--gold" id="seatAuto">✦ KI ordnet automatisch</button>
             <div class="seat-actions-row">
@@ -352,14 +356,25 @@
             <li><span class="lg-dot lg-together"></span>„↔“ markiert Paare, die zusammen sitzen — die KI hält sie beieinander.</li>
             <li><span class="lg-dot lg-conflict"></span>Rot pulsierend = zwei Gäste, die besser nicht an einen Tisch sollten.</li>
           </ul>
+          <button type="button" class="seat-print" id="seatPrint">⎙ Sitzplan drucken</button>
         </aside>
 
         <div class="venue">
-          <div class="venue-stage">
-            <span>♥ Brauttisch</span>
-            <em>Hier sitzt das Brautpaar — Bühne &amp; Mittelpunkt des Abends</em>
+          <div class="venue-top">
+            <div class="venue-stage">
+              <span>♥ Brauttisch</span>
+              <em>Hier sitzt das Brautpaar</em>
+            </div>
+            <div class="venue-spot venue-dj"><b>🎧</b><span>DJ &amp; Bühne</span></div>
           </div>
+          <div class="venue-dancefloor"><span>Tanzfläche</span></div>
           <div class="venue-floor" id="seatTables"><!-- runde Tische per JS --></div>
+          <div class="venue-stations">
+            <span class="venue-spot"><b>🍸</b>Bar</span>
+            <span class="venue-spot"><b>🍽️</b>Buffet</span>
+            <span class="venue-spot"><b>🎁</b>Geschenke</span>
+            <span class="venue-spot"><b>📸</b>Fotobox</span>
+          </div>
           <div class="venue-foot"><span id="seatTablesUsed">0</span> Tische im Einsatz &nbsp;·&nbsp; <span id="seatSeatedCount">0</span> Gäste gesetzt</div>
         </div>
       </div>

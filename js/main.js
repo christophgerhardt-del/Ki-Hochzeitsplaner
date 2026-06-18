@@ -491,7 +491,7 @@
     show(0);
   })();
 
-  /* =================================================== 7. Sitzplan-Planer (rund, Drag & Drop) */
+  /* =================================================== 7. Sitzplan-Planer (Saal, runde Tische, Drag & Drop) */
   (function seating() {
     const pool = $("#seatPool");
     if (!pool) return;
@@ -503,7 +503,7 @@
     const usedEl = $("#seatTablesUsed");
     const seatedEl = $("#seatSeatedCount");
 
-    const guests = [
+    const baseGuests = [
       { id: "g1",  name: "Oma Erika",        grp: "Familie Braut" },
       { id: "g2",  name: "Opa Klaus",        grp: "Familie Braut" },
       { id: "g3",  name: "Mama Susanne",     grp: "Familie Braut" },
@@ -519,15 +519,14 @@
       { id: "g13", name: "Kollege Tom",      grp: "Arbeit" },
       { id: "g14", name: "Kollegin Nina",    grp: "Arbeit" }
     ];
-    // Konflikte: sollten NICHT am selben Tisch sitzen
     const conflicts = [ ["g4", "g8"], ["g1", "g8"], ["g2", "g8"] ];
-    // Paare, die zusammen sitzen MÜSSEN
     const togetherPairs = [ ["g10", "g11"] ];
     const groupColor = {
       "Familie Braut": "#b08d57",
       "Familie Bräutigam": "#5e2733",
       "Freunde": "#3f7a4f",
-      "Arbeit": "#4a6f9b"
+      "Arbeit": "#4a6f9b",
+      "Eigene Gäste": "#7a5c9e"
     };
 
     const freshTables = () => ([
@@ -535,10 +534,29 @@
       { id: "t2", name: "Freunde", cap: 6 },
       { id: "t3", name: "Bunt gemischt", cap: 6 }
     ]);
+
+    let guests = baseGuests.map((g) => Object.assign({}, g));
     let tables = freshTables();
     let tableSeq = 3;
+    let guestSeq = baseGuests.length;
     let seatMap = {};      // guestId -> tableId
     let selected = null;   // ausgewählter Gast (Tap-Fallback)
+
+    // gespeicherten Zustand laden (überlebt einen Reload)
+    (function load() {
+      const s = store.get("seating", null);
+      if (!s) return;
+      (s.custom || []).forEach((c) => {
+        if (c && c.id && !guests.find((g) => g.id === c.id)) guests.push({ id: c.id, name: c.name, grp: c.grp, custom: true });
+      });
+      if (Array.isArray(s.tables) && s.tables.length) tables = s.tables.map((t) => ({ id: t.id, name: t.name, cap: t.cap }));
+      if (typeof s.tableSeq === "number") tableSeq = s.tableSeq;
+      if (typeof s.guestSeq === "number") guestSeq = s.guestSeq;
+      if (s.seatMap) Object.keys(s.seatMap).forEach((gid) => {
+        const tid = s.seatMap[gid];
+        if (guests.find((g) => g.id === gid) && tables.find((t) => t.id === tid)) seatMap[gid] = tid;
+      });
+    })();
 
     const byId = (id) => guests.find((g) => g.id === id);
     const tableCount = (tId) => Object.values(seatMap).filter((v) => v === tId).length;
@@ -566,6 +584,35 @@
     function setStatus(msg, type) {
       statusEl.textContent = msg || "";
       statusEl.className = "seat-status" + (type ? " is-" + type : "");
+    }
+    function persist() {
+      store.set("seating", {
+        seatMap, tables, tableSeq, guestSeq,
+        custom: guests.filter((g) => g.custom).map((g) => ({ id: g.id, name: g.name, grp: g.grp }))
+      });
+    }
+
+    /* ---- Konfetti, wenn alle konfliktfrei sitzen ---- */
+    let firstRender = true, celebrated = false;
+    function maybeCelebrate(success) {
+      if (firstRender) { celebrated = success; firstRender = false; return; }
+      if (success && !celebrated) { celebrated = true; if (!reduceMotion) confettiBurst(); }
+      else if (!success) celebrated = false;
+    }
+    function confettiBurst() {
+      const colors = ["#b08d57", "#5e2733", "#3f7a4f", "#4a6f9b", "#e9dccf"];
+      const layer = document.createElement("div");
+      layer.className = "confetti";
+      for (let i = 0; i < 70; i++) {
+        const c = document.createElement("i");
+        c.style.left = (Math.random() * 100).toFixed(2) + "%";
+        c.style.background = colors[i % colors.length];
+        c.style.animationDelay = (Math.random() * 0.4).toFixed(2) + "s";
+        c.style.animationDuration = (1.8 + Math.random() * 1.2).toFixed(2) + "s";
+        layer.appendChild(c);
+      }
+      document.body.appendChild(layer);
+      setTimeout(() => layer.remove(), 3200);
     }
 
     function render() {
@@ -601,23 +648,31 @@
           }
         }
         const free = t.cap - seated.length;
+        const canDelete = seated.length === 0 && tables.length > 1;
         return `
           <div class="rtable ${free === 0 ? "is-full" : ""}" data-table="${t.id}">
+            ${canDelete ? `<button type="button" class="rtable-del" data-deltable="${t.id}" title="Tisch entfernen" aria-label="Tisch entfernen">✕</button>` : ""}
             ${slots}
             <div class="rtable-disc">
               <span class="rtable-name">${t.name}</span>
-              <span class="rtable-cap">${seated.length}/${t.cap}</span>
+              <span class="rtable-size">
+                <button type="button" data-capadj="-" data-table="${t.id}" title="Weniger Plätze" aria-label="Weniger Plätze">−</button>
+                <span class="rtable-cap">${seated.length}/${t.cap}</span>
+                <button type="button" data-capadj="+" data-table="${t.id}" title="Mehr Plätze" aria-label="Mehr Plätze">+</button>
+              </span>
             </div>
           </div>`;
       }).join("");
 
       if (usedEl) usedEl.textContent = tables.filter((t) => tableCount(t.id) > 0).length;
       if (seatedEl) seatedEl.textContent = guests.length - open.length;
+      const c = countConflicts();
       if (conflictEl) {
-        const c = countConflicts();
         conflictEl.textContent = c === 0 ? "0 Konflikte" : (c + (c === 1 ? " Konflikt" : " Konflikte"));
         conflictEl.classList.toggle("is-bad", c > 0);
       }
+      persist();
+      maybeCelebrate(open.length === 0 && c === 0);
     }
 
     function placeGuest(id, tId) {
@@ -648,6 +703,30 @@
       render();
     }
 
+    function adjustCap(tId, dir) {
+      const t = tables.find((x) => x.id === tId); if (!t) return;
+      if (dir === "+") t.cap = Math.min(12, t.cap + 1);
+      else t.cap = Math.max(2, Math.max(tableCount(tId), t.cap - 1));
+      setStatus("„" + t.name + "“ hat jetzt " + t.cap + " Plätze.", "");
+      render();
+    }
+    function removeTable(tId) {
+      if (tables.length <= 1) return;
+      if (tableCount(tId) > 0) { setStatus("Tisch erst leeren, dann entfernen.", "warn"); return; }
+      tables = tables.filter((t) => t.id !== tId);
+      setStatus("Tisch entfernt.", "");
+      render();
+    }
+    function addGuest(name) {
+      name = (name || "").trim();
+      if (!name) return false;
+      guestSeq++;
+      guests.push({ id: "g" + guestSeq, name: name.slice(0, 28), grp: "Eigene Gäste", custom: true });
+      setStatus("„" + name + "“ zur Gästeliste hinzugefügt.", "ok");
+      render();
+      return true;
+    }
+
     /* ---- Tap-Fallback: Gast wählen, dann Tisch antippen ---- */
     let suppressClick = false;
     pool.addEventListener("click", (e) => {
@@ -663,6 +742,10 @@
     });
     floor.addEventListener("click", (e) => {
       if (suppressClick) return;
+      const cap = e.target.closest("[data-capadj]");
+      if (cap) { adjustCap(cap.dataset.table, cap.dataset.capadj); return; }
+      const del = e.target.closest("[data-deltable]");
+      if (del) { removeTable(del.dataset.deltable); return; }
       const rm = e.target.closest("[data-remove]");
       if (rm) { unseat(rm.dataset.remove); return; }
       const t = e.target.closest("[data-table]");
@@ -752,7 +835,7 @@
       const parent = {};
       guests.forEach((g) => { parent[g.id] = g.id; });
       const find = (x) => (parent[x] === x ? x : (parent[x] = find(parent[x])));
-      togetherPairs.forEach(([a, b]) => { parent[find(a)] = find(b); });
+      togetherPairs.forEach(([a, b]) => { if (parent[a] && parent[b]) parent[find(a)] = find(b); });
       const unitMap = {};
       guests.forEach((g) => { const r = find(g.id); (unitMap[r] = unitMap[r] || []).push(g); });
       const units = Object.values(unitMap).sort((a, b) => a[0].grp.localeCompare(b[0].grp));
@@ -768,7 +851,7 @@
 
       const openLeft = guests.filter((g) => !seatMap[g.id]).length;
       const c = countConflicts();
-      if (openLeft) setStatus("KI-Vorschlag erstellt — " + openLeft + " Gäste brauchen noch einen Platz. Legt mit „+ Tisch“ einfach weitere an.", "warn");
+      if (openLeft) setStatus("KI-Vorschlag erstellt — " + openLeft + " Gäste brauchen noch einen Platz. Legt mit „+ Tisch“ weitere an.", "warn");
       else if (c > 0) setStatus("Fast perfekt: alle sitzen, " + c + (c === 1 ? " Konstellation" : " Konstellationen") + " ließ sich nicht ganz vermeiden — markiert.", "warn");
       else setStatus("✦ Fertig: Alle konfliktfrei platziert — Paare zusammen, Familien beieinander, heikle Paare getrennt.", "ok");
       hintEl.textContent = "Zieht einzelne Gäste um, bis es sich perfekt anfühlt.";
@@ -776,15 +859,25 @@
       render();
     });
 
-    /* ---- Tisch hinzufügen / Zurücksetzen ---- */
+    /* ---- Tisch hinzufügen / Gast hinzufügen / drucken / zurücksetzen ---- */
     $("#seatAddTable").addEventListener("click", () => {
       tableSeq++;
       tables.push({ id: "t" + tableSeq, name: "Tisch " + tableSeq, cap: 6 });
       setStatus("Neuer runder Tisch hinzugefügt.", "ok");
       render();
     });
+    const newName = $("#seatNewName");
+    const addBtn = $("#seatAddGuest");
+    if (addBtn && newName) {
+      addBtn.addEventListener("click", () => { if (addGuest(newName.value)) newName.value = ""; newName.focus(); });
+      newName.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); if (addGuest(newName.value)) newName.value = ""; } });
+    }
+    const printBtn = $("#seatPrint");
+    if (printBtn) printBtn.addEventListener("click", () => window.print());
+
     $("#seatReset").addEventListener("click", () => {
-      seatMap = {}; selected = null; tables = freshTables(); tableSeq = 3;
+      guests = baseGuests.map((g) => Object.assign({}, g));
+      seatMap = {}; selected = null; tables = freshTables(); tableSeq = 3; guestSeq = baseGuests.length;
       setStatus("Zurückgesetzt.", "");
       hintEl.textContent = "Gast greifen und auf einen Tisch ziehen — oder antippen, dann Tisch wählen.";
       render();
