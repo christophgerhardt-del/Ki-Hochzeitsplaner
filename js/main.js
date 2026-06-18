@@ -491,7 +491,7 @@
     show(0);
   })();
 
-  /* =================================================== 7. Sitzplan-Planer */
+  /* =================================================== 7. Sitzplan-Planer (rund, Drag & Drop) */
   (function seating() {
     const pool = $("#seatPool");
     if (!pool) return;
@@ -500,61 +500,72 @@
     const remainingEl = $("#seatRemaining");
     const hintEl = $("#seatHint");
     const conflictEl = $("#seatConflicts");
+    const usedEl = $("#seatTablesUsed");
+    const seatedEl = $("#seatSeatedCount");
 
-    // Gäste mit Gruppe
     const guests = [
-      { id: "g1",  name: "Oma Erika",       grp: "Familie Braut" },
-      { id: "g2",  name: "Opa Klaus",       grp: "Familie Braut" },
-      { id: "g3",  name: "Mama Susanne",    grp: "Familie Braut" },
-      { id: "g4",  name: "Papa Bernd",      grp: "Familie Braut" },
-      { id: "g5",  name: "Cousine Mia",     grp: "Familie Braut" },
-      { id: "g6",  name: "Tante Rita",      grp: "Familie Bräutigam" },
-      { id: "g7",  name: "Onkel Dieter",    grp: "Familie Bräutigam" },
-      { id: "g8",  name: "Stiefvater Frank",grp: "Familie Bräutigam" },
-      { id: "g9",  name: "Lisa (Trauzeugin)", grp: "Freunde" },
-      { id: "g10", name: "Max",             grp: "Freunde" },
-      { id: "g11", name: "Jana",            grp: "Freunde" },
-      { id: "g12", name: "DJ-Freund Ali",   grp: "Freunde" },
-      { id: "g13", name: "Kollege Tom",     grp: "Arbeit" },
-      { id: "g14", name: "Kollegin Nina",   grp: "Arbeit" }
+      { id: "g1",  name: "Oma Erika",        grp: "Familie Braut" },
+      { id: "g2",  name: "Opa Klaus",        grp: "Familie Braut" },
+      { id: "g3",  name: "Mama Susanne",     grp: "Familie Braut" },
+      { id: "g4",  name: "Papa Bernd",       grp: "Familie Braut" },
+      { id: "g5",  name: "Cousine Mia",      grp: "Familie Braut" },
+      { id: "g6",  name: "Tante Rita",       grp: "Familie Bräutigam" },
+      { id: "g7",  name: "Onkel Dieter",     grp: "Familie Bräutigam" },
+      { id: "g8",  name: "Stiefvater Frank", grp: "Familie Bräutigam" },
+      { id: "g9",  name: "Lisa (Trauzeugin)",grp: "Freunde" },
+      { id: "g10", name: "Max",              grp: "Freunde" },
+      { id: "g11", name: "Jana",             grp: "Freunde" },
+      { id: "g12", name: "DJ-Freund Ali",    grp: "Freunde" },
+      { id: "g13", name: "Kollege Tom",      grp: "Arbeit" },
+      { id: "g14", name: "Kollegin Nina",    grp: "Arbeit" }
     ];
-    // Konflikte: sollten NICHT am selben Tisch sitzen (z. B. zerstrittene Familie)
+    // Konflikte: sollten NICHT am selben Tisch sitzen
     const conflicts = [ ["g4", "g8"], ["g1", "g8"], ["g2", "g8"] ];
     // Paare, die zusammen sitzen MÜSSEN
     const togetherPairs = [ ["g10", "g11"] ];
+    const groupColor = {
+      "Familie Braut": "#b08d57",
+      "Familie Bräutigam": "#5e2733",
+      "Freunde": "#3f7a4f",
+      "Arbeit": "#4a6f9b"
+    };
 
-    const tables = [
-      { id: "t1", name: "Tisch 1 · Familie", cap: 4 },
-      { id: "t2", name: "Tisch 2 · Familie", cap: 4 },
-      { id: "t3", name: "Tisch 3 · Freunde", cap: 4 },
-      { id: "t4", name: "Tisch 4 · Bunt",    cap: 4 }
-    ];
-
+    const freshTables = () => ([
+      { id: "t1", name: "Familie", cap: 6 },
+      { id: "t2", name: "Freunde", cap: 6 },
+      { id: "t3", name: "Bunt gemischt", cap: 6 }
+    ]);
+    let tables = freshTables();
+    let tableSeq = 3;
     let seatMap = {};      // guestId -> tableId
-    let selected = null;   // ausgewählter Gast
+    let selected = null;   // ausgewählter Gast (Tap-Fallback)
 
     const byId = (id) => guests.find((g) => g.id === id);
     const tableCount = (tId) => Object.values(seatMap).filter((v) => v === tId).length;
-
+    const initials = (name) => {
+      const w = name.replace(/[()]/g, "").split(/[\s-]+/).filter(Boolean);
+      const a = w[0] ? w[0][0] : "?";
+      const b = w.length > 1 ? w[w.length - 1][0] : "";
+      return (a + b).toUpperCase();
+    };
     function partnersOf(id) {
       const out = [];
-      togetherPairs.forEach(([a, b]) => {
-        if (a === id) out.push(b);
-        if (b === id) out.push(a);
-      });
+      togetherPairs.forEach(([a, b]) => { if (a === id) out.push(b); if (b === id) out.push(a); });
       return out;
     }
-
     function conflictAt(tableId, guestId) {
       const here = Object.keys(seatMap).filter((g) => seatMap[g] === tableId && g !== guestId);
       return conflicts.some(([a, b]) =>
         (a === guestId && here.includes(b)) || (b === guestId && here.includes(a)));
     }
-
     function countConflicts() {
       let n = 0;
       guests.forEach((g) => { if (seatMap[g.id] && conflictAt(seatMap[g.id], g.id)) n++; });
-      return n / 2; // jedes Paar doppelt gezählt
+      return n / 2;
+    }
+    function setStatus(msg, type) {
+      statusEl.textContent = msg || "";
+      statusEl.className = "seat-status" + (type ? " is-" + type : "");
     }
 
     function render() {
@@ -566,30 +577,42 @@
             const mate = partnersOf(g.id).map(byId).filter(Boolean).map((p) => p.name);
             const note = mate.length ? `<span class="chip-note">↔ mit ${mate.join(", ")}</span>` : "";
             return `
-              <button type="button" class="chip ${selected === g.id ? "is-selected" : ""}" data-guest="${g.id}">
-                <span class="chip-name">${g.name}</span><span class="chip-grp">${g.grp}</span>${note}
+              <button type="button" class="chip ${selected === g.id ? "is-selected" : ""}" data-guest="${g.id}" draggable="false">
+                <span class="chip-ava" style="background:${groupColor[g.grp] || "#888"}">${initials(g.name)}</span>
+                <span class="chip-text"><span class="chip-name">${g.name}</span><span class="chip-grp">${g.grp}</span>${note}</span>
               </button>`;
           }).join("")
         : `<p class="seat-empty">Alle Gäste sitzen. 🎉</p>`;
 
       floor.innerHTML = tables.map((t) => {
         const seated = guests.filter((g) => seatMap[g.id] === t.id);
-        const seats = seated.map((g) => {
-          const bad = conflictAt(t.id, g.id);
-          return `<button type="button" class="seat ${bad ? "is-conflict" : ""}" data-remove="${g.id}" title="Entfernen">${g.name}${bad ? " ⚠" : ""}</button>`;
-        }).join("");
+        let slots = "";
+        for (let i = 0; i < t.cap; i++) {
+          const ang = (i / t.cap) * 2 * Math.PI - Math.PI / 2; // Start oben
+          const R = 46;
+          const x = (50 + R * Math.cos(ang)).toFixed(2);
+          const y = (50 + R * Math.sin(ang)).toFixed(2);
+          const g = seated[i];
+          if (g) {
+            const bad = conflictAt(t.id, g.id);
+            slots += `<button type="button" class="pseat ${bad ? "is-conflict" : ""}" data-remove="${g.id}" style="left:${x}%;top:${y}%" title="${g.name} — entfernen"><span class="pseat-ini" style="background:${groupColor[g.grp] || "#888"}">${initials(g.name)}</span></button>`;
+          } else {
+            slots += `<span class="pseat is-empty" style="left:${x}%;top:${y}%"></span>`;
+          }
+        }
         const free = t.cap - seated.length;
-        const placing = selected && free > 0;
         return `
-          <div class="table ${placing ? "is-target" : ""} ${free === 0 ? "is-full" : ""}" data-table="${t.id}">
-            <div class="table-top">
-              <span class="table-name">${t.name}</span>
-              <span class="table-cap">${seated.length}/${t.cap}</span>
+          <div class="rtable ${free === 0 ? "is-full" : ""}" data-table="${t.id}">
+            ${slots}
+            <div class="rtable-disc">
+              <span class="rtable-name">${t.name}</span>
+              <span class="rtable-cap">${seated.length}/${t.cap}</span>
             </div>
-            <div class="table-seats">${seats || '<span class="table-empty">frei — Gast hierher setzen</span>'}</div>
           </div>`;
       }).join("");
 
+      if (usedEl) usedEl.textContent = tables.filter((t) => tableCount(t.id) > 0).length;
+      if (seatedEl) seatedEl.textContent = guests.length - open.length;
       if (conflictEl) {
         const c = countConflicts();
         conflictEl.textContent = c === 0 ? "0 Konflikte" : (c + (c === 1 ? " Konflikt" : " Konflikte"));
@@ -597,116 +620,173 @@
       }
     }
 
-    function setStatus(msg, type) {
-      statusEl.textContent = msg || "";
-      statusEl.className = "seat-status" + (type ? " is-" + type : "");
+    function placeGuest(id, tId) {
+      const t = tables.find((x) => x.id === tId);
+      if (!t) return;
+      const already = seatMap[id] === tId;
+      if (!already && tableCount(tId) >= t.cap) { setStatus("„" + t.name + "“ ist voll.", "warn"); render(); return; }
+      const willConflict = conflictAt(tId, id);
+      seatMap[id] = tId;
+      const name = byId(id).name;
+
+      let movedMate = null;
+      partnersOf(id).filter((m) => !seatMap[m]).forEach((m) => {
+        if (tableCount(tId) < t.cap) { seatMap[m] = tId; movedMate = byId(m).name; }
+      });
+
+      if (willConflict) setStatus("⚠ Heikel: " + name + " sollte hier besser nicht sitzen — wir haben es markiert.", "warn");
+      else if (movedMate) setStatus(name + " & " + movedMate + " sitzen zusammen an „" + t.name + "“.", "ok");
+      else setStatus(name + " sitzt an „" + t.name + "“.", "ok");
+
+      selected = null;
+      hintEl.textContent = "Weiter geht's — nächsten Gast ziehen oder antippen.";
+      render();
     }
 
-    // Gast wählen
+    function unseat(id) {
+      if (seatMap[id]) { const name = byId(id).name; delete seatMap[id]; setStatus(name + " zurück in die Gästeliste.", ""); }
+      render();
+    }
+
+    /* ---- Tap-Fallback: Gast wählen, dann Tisch antippen ---- */
+    let suppressClick = false;
     pool.addEventListener("click", (e) => {
+      if (suppressClick) return;
       const chip = e.target.closest("[data-guest]"); if (!chip) return;
       const id = chip.dataset.guest;
       selected = selected === id ? null : id;
       hintEl.textContent = selected
-        ? byId(selected).name + " gewählt — jetzt einen Tisch antippen."
-        : "Gast antippen, dann einen Tisch wählen.";
+        ? byId(selected).name + " gewählt — jetzt einen Tisch antippen (oder ziehen)."
+        : "Gast greifen und auf einen Tisch ziehen — oder antippen, dann Tisch wählen.";
       setStatus("");
       render();
     });
-
-    // Tisch wählen -> setzen | Sitz antippen -> entfernen
     floor.addEventListener("click", (e) => {
-      const remove = e.target.closest("[data-remove]");
-      if (remove) {
-        delete seatMap[remove.dataset.remove];
-        setStatus("Gast wieder freigestellt.", "");
-        render();
-        return;
+      if (suppressClick) return;
+      const rm = e.target.closest("[data-remove]");
+      if (rm) { unseat(rm.dataset.remove); return; }
+      const t = e.target.closest("[data-table]");
+      if (t) {
+        if (selected) placeGuest(selected, t.dataset.table);
+        else setStatus("Erst einen Gast antippen oder per Drag ziehen.", "warn");
       }
-      const table = e.target.closest("[data-table]");
-      if (!table) return;
-      if (!selected) { setStatus("Erst links einen Gast antippen.", "warn"); return; }
-      const tId = table.dataset.table;
-      const t = tables.find((x) => x.id === tId);
-      if (tableCount(tId) >= t.cap) { setStatus(t.name + " ist schon voll.", "warn"); return; }
-
-      const willConflict = conflictAt(tId, selected);
-      const name = byId(selected).name;
-      seatMap[selected] = tId;
-
-      // Partner möglichst gleich mitsetzen
-      const mates = partnersOf(selected).filter((m) => !seatMap[m]);
-      let movedMate = null;
-      mates.forEach((m) => {
-        if (tableCount(tId) < t.cap) { seatMap[m] = tId; movedMate = byId(m).name; }
-      });
-
-      if (willConflict) {
-        setStatus("⚠ Heikel: " + name + " sollte hier besser nicht sitzen — wir haben es markiert.", "warn");
-      } else if (movedMate) {
-        setStatus(name + " & " + movedMate + " sitzen zusammen an „" + t.name + "“.", "ok");
-      } else {
-        setStatus(name + " sitzt an „" + t.name + "“.", "ok");
-      }
-      selected = null;
-      hintEl.textContent = "Gast antippen, dann einen Tisch wählen.";
-      render();
     });
 
-    // KI ordnet automatisch — Paare zusammen, konfliktfrei, gruppenweise
+    /* ---- Drag & Drop via Pointer Events (Maus + Touch) ---- */
+    let drag = null, ghost = null, lastTarget = null;
+    const startGhost = (id) => {
+      const g = byId(id);
+      ghost = document.createElement("div");
+      ghost.className = "seat-ghost";
+      ghost.innerHTML = `<span class="pseat-ini" style="background:${groupColor[g.grp] || "#888"}">${initials(g.name)}</span><span>${g.name}</span>`;
+      document.body.appendChild(ghost);
+      document.body.classList.add("seat-dragging");
+    };
+    const moveGhost = (x, y) => { if (ghost) { ghost.style.left = x + "px"; ghost.style.top = y + "px"; } };
+    const clearHighlight = () => {
+      if (lastTarget) { lastTarget.classList.remove("is-target"); lastTarget = null; }
+      pool.classList.remove("is-drop");
+    };
+    const endGhost = () => {
+      if (ghost) { ghost.remove(); ghost = null; }
+      document.body.classList.remove("seat-dragging");
+      clearHighlight();
+    };
+    const targetAt = (x, y) => {
+      const el = document.elementFromPoint(x, y);
+      if (!el) return null;
+      const t = el.closest("[data-table]");
+      if (t) return { type: "table", id: t.dataset.table, el: t };
+      if (el.closest("#seatPool") || el.closest(".seat-side")) return { type: "pool" };
+      return null;
+    };
+    const highlight = (tgt) => {
+      clearHighlight();
+      if (tgt && tgt.type === "table") { tgt.el.classList.add("is-target"); lastTarget = tgt.el; }
+      else if (tgt && tgt.type === "pool") pool.classList.add("is-drop");
+    };
+    const onMove = (e) => {
+      if (!drag) return;
+      const x = e.clientX, y = e.clientY;
+      if (!drag.moved) {
+        if (Math.hypot(x - drag.x, y - drag.y) < 6) return;
+        drag.moved = true;
+        startGhost(drag.id);
+      }
+      e.preventDefault();
+      moveGhost(x, y);
+      highlight(targetAt(x, y));
+    };
+    const onUp = (e) => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      if (drag && drag.moved) {
+        const tgt = targetAt(e.clientX, e.clientY);
+        if (tgt && tgt.type === "table") placeGuest(drag.id, tgt.id);
+        else if (tgt && tgt.type === "pool") unseat(drag.id);
+        else render();
+        endGhost();
+        suppressClick = true;
+        setTimeout(() => { suppressClick = false; }, 80);
+      }
+      drag = null;
+    };
+    const onDown = (e) => {
+      const chip = e.target.closest("[data-guest],[data-remove]");
+      if (!chip) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      drag = { id: chip.dataset.guest || chip.dataset.remove, x: e.clientX, y: e.clientY, moved: false };
+      window.addEventListener("pointermove", onMove, { passive: false });
+      window.addEventListener("pointerup", onUp);
+      window.addEventListener("pointercancel", onUp);
+    };
+    if (window.PointerEvent) {
+      pool.addEventListener("pointerdown", onDown);
+      floor.addEventListener("pointerdown", onDown);
+    }
+
+    /* ---- KI ordnet automatisch (Paare zusammen, konfliktfrei) ---- */
     $("#seatAuto").addEventListener("click", () => {
       seatMap = {}; selected = null;
-
-      // Einheiten bilden (zusammengehörige Gäste verschmelzen) via Union-Find
       const parent = {};
       guests.forEach((g) => { parent[g.id] = g.id; });
       const find = (x) => (parent[x] === x ? x : (parent[x] = find(parent[x])));
       togetherPairs.forEach(([a, b]) => { parent[find(a)] = find(b); });
       const unitMap = {};
       guests.forEach((g) => { const r = find(g.id); (unitMap[r] = unitMap[r] || []).push(g); });
-      // nach Gruppe sortieren, damit Familien zusammen sitzen
-      const units = Object.values(unitMap)
-        .sort((a, b) => a[0].grp.localeCompare(b[0].grp));
-
-      const unitConflicts = (tId, members) =>
-        members.some((g) => conflictAt(tId, g.id));
+      const units = Object.values(unitMap).sort((a, b) => a[0].grp.localeCompare(b[0].grp));
+      const unitConflicts = (tId, members) => members.some((g) => conflictAt(tId, g.id));
 
       units.forEach((members) => {
         const size = members.length;
-        const place = (tId) => members.forEach((g) => { seatMap[g.id] = tId; });
-        // 1. Tisch mit Platz UND ohne Konflikt
         let target = tables.find((t) => (t.cap - tableCount(t.id)) >= size && !unitConflicts(t.id, members));
-        // 2. sonst irgendein Tisch mit Platz
         if (!target) target = tables.find((t) => (t.cap - tableCount(t.id)) >= size);
-        // 3. notfalls einzeln verteilen
-        if (target) place(target.id);
-        else members.forEach((g) => {
-          const t = tables.find((x) => tableCount(x.id) < x.cap);
-          if (t) seatMap[g.id] = t.id;
-        });
+        if (target) members.forEach((g) => { seatMap[g.id] = target.id; });
+        else members.forEach((g) => { const t = tables.find((x) => tableCount(x.id) < x.cap); if (t) seatMap[g.id] = t.id; });
       });
 
       const openLeft = guests.filter((g) => !seatMap[g.id]).length;
       const c = countConflicts();
-      if (openLeft) {
-        setStatus("KI-Vorschlag erstellt — " + openLeft + " Gäste passen nicht mehr an die Demo-Tische. In der echten Planung legen wir einfach weitere Tische an.", "warn");
-      } else if (c > 0) {
-        setStatus("Fast perfekt: alle sitzen, aber " + c + (c === 1 ? " Konstellation ließ" : " Konstellationen ließen") + " sich an so wenigen Tischen nicht ganz vermeiden — markiert.", "warn");
-      } else {
-        setStatus("✦ Fertig: Alle Gäste konfliktfrei platziert — Paare zusammen, Familien beieinander, heikle Paare getrennt.", "ok");
-      }
-      hintEl.textContent = "Tipp: Einzelne Gäste antippen zum Entfernen, dann neu setzen.";
-      if (!reduceMotion) {
-        floor.classList.add("just-arranged");
-        setTimeout(() => floor.classList.remove("just-arranged"), 700);
-      }
+      if (openLeft) setStatus("KI-Vorschlag erstellt — " + openLeft + " Gäste brauchen noch einen Platz. Legt mit „+ Tisch“ einfach weitere an.", "warn");
+      else if (c > 0) setStatus("Fast perfekt: alle sitzen, " + c + (c === 1 ? " Konstellation" : " Konstellationen") + " ließ sich nicht ganz vermeiden — markiert.", "warn");
+      else setStatus("✦ Fertig: Alle konfliktfrei platziert — Paare zusammen, Familien beieinander, heikle Paare getrennt.", "ok");
+      hintEl.textContent = "Zieht einzelne Gäste um, bis es sich perfekt anfühlt.";
+      if (!reduceMotion) { floor.classList.add("just-arranged"); setTimeout(() => floor.classList.remove("just-arranged"), 700); }
       render();
     });
 
+    /* ---- Tisch hinzufügen / Zurücksetzen ---- */
+    $("#seatAddTable").addEventListener("click", () => {
+      tableSeq++;
+      tables.push({ id: "t" + tableSeq, name: "Tisch " + tableSeq, cap: 6 });
+      setStatus("Neuer runder Tisch hinzugefügt.", "ok");
+      render();
+    });
     $("#seatReset").addEventListener("click", () => {
-      seatMap = {}; selected = null;
+      seatMap = {}; selected = null; tables = freshTables(); tableSeq = 3;
       setStatus("Zurückgesetzt.", "");
-      hintEl.textContent = "Gast antippen, dann einen Tisch wählen.";
+      hintEl.textContent = "Gast greifen und auf einen Tisch ziehen — oder antippen, dann Tisch wählen.";
       render();
     });
 

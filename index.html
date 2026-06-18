@@ -328,29 +328,40 @@
     <div class="wrap">
       <div class="section-head center" data-reveal>
         <span class="eyebrow center">Interaktiv · Sitzplan-Planer</span>
-        <h2 class="h2">Der Sitzplan, der sich fast von selbst löst.</h2>
-        <p>Probiert es aus: Tippt einen Gast an, dann einen Tisch — schon sitzt er. Paare wie „Max &amp; Jana“ bleiben automatisch zusammen, heikle Kombinationen (etwa Papa und der neue Mann seiner Ex) werden erkannt und markiert. Oder lasst die KI in einem Klick alle 14 Gäste konfliktfrei verteilen.</p>
+        <h2 class="h2">Runde Tische, echtes Drag &amp; Drop — zieht eure Gäste an ihren Platz.</h2>
+        <p>Schnappt euch einen Gast und zieht ihn an einen runden Tisch — am Laptop wie am Smartphone. Paare wie „Max &amp; Jana“ bleiben automatisch zusammen, heikle Konstellationen leuchten rot auf. Oder lasst die KI in einem Klick einen harmonischen Plan legen.</p>
       </div>
 
       <div class="seat-tool" data-reveal data-delay="1">
-        <div class="seat-side">
+        <aside class="seat-side">
           <div class="seat-headrow">
-            <h4 class="seat-h">Offene Gäste <span id="seatRemaining" class="seat-pill">0</span></h4>
+            <h4 class="seat-h">Gästeliste <span id="seatRemaining" class="seat-pill">0</span></h4>
             <span class="seat-conflicts" id="seatConflicts">0 Konflikte</span>
           </div>
-          <p class="seat-hint" id="seatHint">Gast antippen, dann einen Tisch wählen.</p>
+          <p class="seat-hint" id="seatHint">Gast greifen und auf einen Tisch ziehen — oder antippen, dann Tisch wählen.</p>
           <div class="seat-pool" id="seatPool"><!-- Gäste per JS --></div>
           <div class="seat-actions">
             <button type="button" class="btn btn--gold" id="seatAuto">✦ KI ordnet automatisch</button>
-            <button type="button" class="btn btn--ghost" id="seatReset">Zurücksetzen</button>
+            <div class="seat-actions-row">
+              <button type="button" class="btn btn--ghost" id="seatAddTable">+ Tisch</button>
+              <button type="button" class="btn btn--ghost" id="seatReset">Zurücksetzen</button>
+            </div>
           </div>
           <p class="seat-status" id="seatStatus" aria-live="polite"></p>
           <ul class="seat-legend">
             <li><span class="lg-dot lg-together"></span>„↔“ markiert Paare, die zusammen sitzen — die KI hält sie beieinander.</li>
-            <li><span class="lg-dot lg-conflict"></span>„⚠“ warnt, wenn zwei Gäste besser nicht an einem Tisch sitzen.</li>
+            <li><span class="lg-dot lg-conflict"></span>Rot pulsierend = zwei Gäste, die besser nicht an einen Tisch sollten.</li>
           </ul>
+        </aside>
+
+        <div class="venue">
+          <div class="venue-stage">
+            <span>♥ Brauttisch</span>
+            <em>Hier sitzt das Brautpaar — Bühne &amp; Mittelpunkt des Abends</em>
+          </div>
+          <div class="venue-floor" id="seatTables"><!-- runde Tische per JS --></div>
+          <div class="venue-foot"><span id="seatTablesUsed">0</span> Tische im Einsatz &nbsp;·&nbsp; <span id="seatSeatedCount">0</span> Gäste gesetzt</div>
         </div>
-        <div class="seat-floor" id="seatTables"><!-- Tische per JS --></div>
       </div>
     </div>
   </section>
