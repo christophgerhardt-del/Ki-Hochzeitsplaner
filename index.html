@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Maison Amoré — KI-Hochzeitsplanung | Von der Location bis zum Sitzplan</title>
-<meta name="description" content="Maison Amoré ist die KI-Hochzeitsplanung auf Niveau einer exklusiven Beratung: Location-Suche, Budget, Gästemanagement, Dienstleister, Ablaufplan und Sitzplan — alles aus einer Hand, rund um die Uhr." />
+<title>Maison Amoré — KI-Hochzeitsplanung | Für frisch verlobte Paare</title>
+<meta name="description" content="Frisch verlobt? Maison Amoré ist die KI-Hochzeitsplanung auf Niveau einer exklusiven Beratung: Budget-Rechner, persönliche Timeline, Stil-Finder, Location-Suche, Dienstleister und intelligenter Sitzplan — alles aus einer Hand, rund um die Uhr." />
 <meta name="theme-color" content="#1c1a17" />
 <meta property="og:title" content="Maison Amoré — KI-Hochzeitsplanung" />
-<meta property="og:description" content="Die Eleganz einer exklusiven Hochzeitsberatung, die Intelligenz einer KI. Von der Location-Suche bis zum Sitzplan." />
+<meta property="og:description" content="Ihr habt Ja gesagt. Den Rest planen wir. Von der Location-Suche bis zum Sitzplan — angetrieben von KI, mit dem Gespür einer Premium-Hochzeitsberatung." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,6 +15,9 @@
 <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+
+<!-- Fortschrittsbalken oben -->
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
 <!-- ============================================================ HEADER -->
 <header class="site-header" id="header">
@@ -24,14 +27,15 @@
       <span>KI-Hochzeitsplanung</span>
     </a>
     <nav class="nav-links" id="navLinks">
+      <a href="#verlobt">Frisch verlobt?</a>
+      <a href="#budget">Budget</a>
       <a href="#leistungen">Leistungen</a>
-      <a href="#ablauf">Ablauf</a>
+      <a href="#stilfinder">Stil-Test</a>
       <a href="#sitzplan">Sitzplan</a>
       <a href="#pakete">Pakete</a>
-      <a href="#faq">Fragen</a>
     </nav>
     <div class="nav-cta">
-      <a href="#kontakt" class="btn btn--gold">Erstgespräch</a>
+      <a href="#kontakt" class="btn btn--gold">Kostenlos starten</a>
       <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -45,20 +49,20 @@
   <section class="hero" id="hero">
     <div class="hero-bg" role="img" aria-label="Festlich gedeckte Hochzeitstafel im Abendlicht" style="background-image:url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=2000&q=80')"></div>
     <div class="wrap hero-inner">
-      <span class="eyebrow" data-reveal>Ihre persönliche Hochzeitsberatung — angetrieben von KI</span>
-      <h1 class="display" data-reveal data-delay="1">Ihr schönster Tag,<br /><em>bis ins Detail</em> geplant.</h1>
-      <p class="lead" data-reveal data-delay="2">Maison Amoré vereint die Eleganz einer exklusiven Hochzeitsberatung mit einer Intelligenz, die niemals schläft. Von der ersten Location-Suche bis zum letzten Platz im Sitzplan — wir übernehmen alles, was ein erstklassiger Hochzeitsplaner tut.</p>
+      <span class="eyebrow" data-reveal>Frisch verlobt? Herzlichen Glückwunsch.</span>
+      <h1 class="display" data-reveal data-delay="1">Ihr habt Ja gesagt.<br />Den Rest <em>planen wir.</em></h1>
+      <p class="lead" data-reveal data-delay="2">Der Ring sitzt, das Glück ist riesig — und im nächsten Moment stehen tausend Fragen im Raum. Maison Amoré nimmt euch alles ab, was ein erstklassiger Hochzeitsplaner tut: von der ersten Budgetfrage über die Location bis zum letzten Platz im Sitzplan. Ruhig, persönlich, rund um die Uhr.</p>
       <div class="hero-actions" data-reveal data-delay="3">
-        <a href="#kontakt" class="btn btn--gold">Kostenloses Erstgespräch <span class="arr">→</span></a>
-        <a href="#leistungen" class="btn btn--ghost">Leistungen entdecken</a>
+        <a href="#budget" class="btn btn--gold">Was kostet unsere Hochzeit? <span class="arr">→</span></a>
+        <a href="#verlobt" class="btn btn--ghost">Wir wissen nicht, wo wir anfangen sollen</a>
       </div>
       <div class="hero-meta" data-reveal data-delay="3">
         <div class="stat"><b data-count="1200" data-suffix="+">0</b><span>geplante Hochzeiten</span></div>
         <div class="stat"><b data-count="98" data-suffix="%">0</b><span>Weiterempfehlung</span></div>
-        <div class="stat"><b data-count="24" data-suffix="/7">0</b><span>für Sie erreichbar</span></div>
+        <div class="stat"><b data-count="24" data-suffix="/7">0</b><span>für euch erreichbar</span></div>
       </div>
     </div>
-    <div class="scroll-hint"><span>Entdecken</span><i></i></div>
+    <div class="scroll-hint"><span>Durchatmen &amp; entdecken</span><i></i></div>
   </section>
 
   <!-- ========================================================== PRESS -->
@@ -75,18 +79,86 @@
     </div>
   </section>
 
-  <!-- ========================================================== INTRO -->
-  <section class="section intro">
-    <div class="wrap intro-grid">
-      <div data-reveal>
-        <span class="eyebrow">Die Philosophie</span>
-        <p class="intro-quote">Eine Hochzeit zu planen sollte sich anfühlen wie das schönste Kapitel — <em>nicht wie ein zweiter Vollzeitjob.</em></p>
+  <!-- ========================================================== VERLOBT / REASSURANCE -->
+  <section class="section verlobt" id="verlobt">
+    <div class="wrap">
+      <div class="section-head center" data-reveal>
+        <span class="eyebrow center">Erst einmal: durchatmen</span>
+        <h2 class="h2">Zwischen „Ja!“ und „Ich will“<br />liegen über 1.000 Entscheidungen.</h2>
+        <p>Datum, Budget, Gästeliste, Location, die Frage, wie man die getrennten Eltern an einen Tisch bekommt — und alle fragen schon, „und, wann ist es so weit?“. Völlig normal, dass sich das überwältigend anfühlt. Ihr müsst das weder allein noch auf einmal lösen.</p>
       </div>
-      <div class="intro-body" data-reveal data-delay="1">
-        <p>Klassische Hochzeitsplaner sind großartig — aber teuer, ausgebucht und nur zu Bürozeiten erreichbar. Maison Amoré denkt das neu: eine KI, die jeden Aspekt Ihrer Hochzeit beherrscht, Ihren Stil versteht und Tag und Nacht für Sie arbeitet.</p>
-        <p>Sie erzählen uns von Ihrer Vision, Ihrem Budget und Ihren Lieblingen. Wir verwandeln das in einen vollständigen, durchgeplanten Tag — mit handverlesenen Locations, geprüften Dienstleistern, einem minutengenauen Ablaufplan und einem Sitzplan, bei dem wirklich jeder am richtigen Tisch sitzt.</p>
-        <div class="signature">Maison Amoré
-          <small>Concierge für den schönsten Tag Ihres Lebens</small>
+
+      <div class="worry-grid">
+        <div class="worry" data-reveal>
+          <span class="worry-q">„Wir haben keine Ahnung, was das alles kostet.“</span>
+          <p>Unser Budget-Rechner zeigt euch in 30 Sekunden eine realistische Spanne — aufgeschlüsselt nach Posten, ehrlich und ohne Schönrechnen.</p>
+          <a href="#budget" class="worry-link">Budget berechnen →</a>
+        </div>
+        <div class="worry" data-reveal data-delay="1">
+          <span class="worry-q">„Wann müssen wir eigentlich was erledigen?“</span>
+          <p>Nennt uns euer Wunschdatum — und ihr bekommt eine persönliche Zeitachse, die euch Monat für Monat sanft an die Hand nimmt.</p>
+          <a href="#timeline" class="worry-link">Timeline erstellen →</a>
+        </div>
+        <div class="worry" data-reveal data-delay="2">
+          <span class="worry-q">„Wir sind uns nicht mal über den Stil einig.“</span>
+          <p>Ein kurzer Test bringt euren gemeinsamen Nenner ans Licht — inklusive passender Locations, Farben und Deko-Ideen.</p>
+          <a href="#stilfinder" class="worry-link">Stil finden →</a>
+        </div>
+        <div class="worry" data-reveal data-delay="3">
+          <span class="worry-q">„Der Sitzplan wird ein Albtraum.“</span>
+          <p>Wird er nicht. Probiert unseren Planer aus: Gäste setzen, Konflikte werden erkannt, die KI ordnet auf Wunsch alles selbst.</p>
+          <a href="#sitzplan" class="worry-link">Sitzplan testen →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== BUDGET-RECHNER (interaktiv) -->
+  <section class="section budget" id="budget">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Interaktiv · Budget-Rechner</span>
+        <h2 class="h2">Was wird eure Hochzeit ungefähr kosten?</h2>
+        <p>Die erste Frage fast jedes verlobten Paares. Verschiebt den Regler, wählt euren Stil — die Schätzung passt sich sofort an. Keine Anmeldung, keine Daten nötig.</p>
+      </div>
+
+      <div class="calc" data-reveal data-delay="1">
+        <div class="calc-controls">
+          <div class="ctrl">
+            <label class="ctrl-label" for="budgetGuests">Anzahl Gäste <b id="budgetGuestsVal">80</b></label>
+            <input type="range" id="budgetGuests" min="10" max="250" step="5" value="80" />
+            <div class="ctrl-scale"><span>10</span><span>250</span></div>
+          </div>
+
+          <div class="ctrl">
+            <span class="ctrl-label">Euer Stil</span>
+            <div class="seg" id="budgetLevel" role="group" aria-label="Stil wählen">
+              <button type="button" class="seg-btn" data-level="0">Intim &amp; schlicht</button>
+              <button type="button" class="seg-btn is-active" data-level="1">Klassisch &amp; schön</button>
+              <button type="button" class="seg-btn" data-level="2">Luxuriös</button>
+            </div>
+          </div>
+
+          <div class="ctrl">
+            <span class="ctrl-label">Region</span>
+            <div class="seg" id="budgetRegion" role="group" aria-label="Region wählen">
+              <button type="button" class="seg-btn" data-region="0.85">Ländlich</button>
+              <button type="button" class="seg-btn is-active" data-region="1">Umland</button>
+              <button type="button" class="seg-btn" data-region="1.2">Großstadt</button>
+            </div>
+          </div>
+
+          <p class="calc-note">Richtwerte für Deutschland, Österreich &amp; die Schweiz. Realistische Orientierung — kein verbindliches Angebot.</p>
+        </div>
+
+        <div class="calc-result">
+          <div class="calc-total">
+            <span class="calc-total-label">Geschätztes Gesamtbudget</span>
+            <b id="budgetTotal">0&nbsp;€</b>
+            <span class="calc-perguest">ca. <b id="budgetPerGuest">0&nbsp;€</b> pro Gast</span>
+          </div>
+          <div class="calc-bars" id="budgetBars"><!-- generiert per JS --></div>
+          <a href="#kontakt" class="btn btn--gold calc-cta">Daraus einen echten Plan machen <span class="arr">→</span></a>
         </div>
       </div>
     </div>
@@ -98,7 +170,7 @@
       <div class="section-head center" data-reveal>
         <span class="eyebrow center">Alles aus einer Hand</span>
         <h2 class="h2">Was ein Hochzeitsplaner tut —<br />nur klüger, schneller, immer da.</h2>
-        <p>Jede Leistung einer Premium-Hochzeitsagentur, vollständig digital orchestriert und auf Ihr Paar zugeschnitten.</p>
+        <p>Jede Leistung einer Premium-Hochzeitsagentur, vollständig digital orchestriert und auf euch als Paar zugeschnitten. Ihr trefft die Entscheidungen — wir nehmen euch die Arbeit ab.</p>
       </div>
 
       <div class="svc-grid">
@@ -106,56 +178,166 @@
           <span class="svc-num">01</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
           <h3>Location-Suche</h3>
-          <p>Wir durchsuchen tausende Schlösser, Weingüter, Scheunen und Hotels und schlagen die Häuser vor, die zu Stil, Gästezahl, Region und Budget passen — inklusive Verfügbarkeit.</p>
+          <p>Wir durchsuchen tausende Schlösser, Weingüter, Scheunen und Hotels und schlagen die Häuser vor, die zu Stil, Gästezahl, Region und Budget passen — inklusive freier Termine. Schluss mit 40 offenen Browser-Tabs.</p>
         </article>
         <article class="svc" data-reveal data-delay="1">
           <span class="svc-num">02</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <h3>Budget &amp; Kostenplan</h3>
-          <p>Ein transparenter Finanzplan, der jeden Posten kalkuliert, vor Überraschungen warnt und automatisch nachjustiert, sobald sich etwas ändert.</p>
+          <p>Ein transparenter Finanzplan, der jeden Posten kalkuliert, vor versteckten Kosten warnt und automatisch nachjustiert, sobald die Gästezahl wackelt. Ihr behaltet die Kontrolle, nicht die Tabelle euch.</p>
         </article>
         <article class="svc" data-reveal data-delay="2">
           <span class="svc-num">03</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg>
           <h3>Gästemanagement</h3>
-          <p>Digitale Einladungen, Zu- und Absagen, Allergien, Übernachtungen und Anreisen — sauber gepflegt und jederzeit aktuell, ganz ohne Excel-Chaos.</p>
+          <p>Digitale Einladungen, Zu- und Absagen, Allergien, Übernachtungen und Anreisen — sauber gepflegt und jederzeit aktuell. Kein „Hat Tante Rita nun zugesagt oder nicht?“ mehr.</p>
         </article>
         <article class="svc" data-reveal>
           <span class="svc-num">04</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
           <h3>Dienstleister-Auswahl</h3>
-          <p>Fotograf, Catering, Floristik, Band oder DJ, Trauredner: kuratierte, geprüfte Empfehlungen mit Bewertungen, Preisrahmen und direkter Anfrage.</p>
+          <p>Fotograf, Catering, Floristik, Band oder DJ, Trauredner: kuratierte, geprüfte Empfehlungen mit Bewertungen, Preisrahmen und direkter Anfrage. Nur Profis, die wirklich zu euch passen.</p>
         </article>
         <article class="svc" data-reveal data-delay="1">
           <span class="svc-num">05</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
           <h3>Timeline &amp; Ablaufplan</h3>
-          <p>Vom 12-Monats-Countdown bis zum minutengenauen Drehbuch des Hochzeitstags — mit Erinnerungen, Aufgaben und klaren Zuständigkeiten.</p>
+          <p>Vom 12-Monats-Countdown bis zum minutengenauen Drehbuch des großen Tages — mit Erinnerungen, Aufgaben und klaren Zuständigkeiten. Ihr wisst immer, was als Nächstes dran ist.</p>
         </article>
         <article class="svc" data-reveal data-delay="2">
           <span class="svc-num">06</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
           <h3>Sitzplan &amp; Tische</h3>
-          <p>Ein Sitzplan, der Beziehungen, Konflikte und Wünsche berücksichtigt — jeder Gast am richtigen Tisch, in Sekunden umstellbar bei jeder Absage.</p>
+          <p>Ein Sitzplan, der Beziehungen, Konflikte und Wünsche berücksichtigt — jeder Gast am richtigen Tisch, in Sekunden umgestellt bei jeder Absage. Selbst die zerstrittenen Onkel bleiben auf Distanz.</p>
         </article>
         <article class="svc" data-reveal>
           <span class="svc-num">07</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.5 7.1 18l.9-5.5-4-3.9L9.5 8z"/></svg>
           <h3>Design &amp; Deko</h3>
-          <p>Farbwelten, Tischdekoration, Papeterie und Mood-Boards — ein stimmiges, durchgängiges Erscheinungsbild für Ihren ganzen Tag.</p>
+          <p>Farbwelten, Tischdekoration, Papeterie und Mood-Boards — ein stimmiges, durchgängiges Erscheinungsbild, das sich wie ihr anfühlt und nicht wie von der Stange.</p>
         </article>
         <article class="svc" data-reveal data-delay="1">
           <span class="svc-num">08</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <h3>Reden &amp; Zeremonie</h3>
-          <p>Hilfe bei Gelübden, Traurede und Tischreden, Ablauf der freien Trauung sowie Musikauswahl für jeden Moment des Tages.</p>
+          <p>Hilfe bei Gelübden, Trau- und Tischreden, Ablauf der freien Trauung sowie Musikauswahl für jeden Moment. Damit der Einzug, das Ja und der erste Tanz genau richtig sitzen.</p>
         </article>
         <article class="svc" data-reveal data-delay="2">
           <span class="svc-num">09</span>
           <svg class="svc-icon" viewBox="0 0 24 24"><path d="M20 7h-9M14 17H5M17 3v8M7 13v8"/><circle cx="17" cy="14" r="3"/><circle cx="7" cy="10" r="3"/></svg>
           <h3>Tag-der-Hochzeit-Regie</h3>
-          <p>Am großen Tag koordiniert die KI alle Gewerke in Echtzeit, hält den Zeitplan im Blick und löst kleine Pannen, bevor Sie sie bemerken.</p>
+          <p>Am großen Tag koordiniert Maison Amoré alle Gewerke, hält den Zeitplan im Blick und löst kleine Pannen, bevor ihr sie überhaupt bemerkt. Ihr feiert — wir halten die Fäden.</p>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== TIMELINE-GENERATOR (interaktiv) -->
+  <section class="section timeline" id="timeline">
+    <div class="wrap">
+      <div class="section-head center" data-reveal>
+        <span class="eyebrow center">Interaktiv · Eure Zeitachse</span>
+        <h2 class="h2">Wann müssen wir was erledigen?</h2>
+        <p>Wählt euer Wunschdatum — und ihr seht sofort, wie viele Tage bleiben und welche Aufgaben Monat für Monat anstehen. Was schon dran wäre, markieren wir.</p>
+      </div>
+
+      <div class="tl-tool" data-reveal data-delay="1">
+        <div class="tl-head">
+          <label class="ctrl-label" for="weddingDate">Unser Wunschdatum</label>
+          <input type="date" id="weddingDate" />
+          <div class="tl-count" id="timelineCountdown" aria-live="polite">
+            <b>—</b><span>Wählt ein Datum, um die Zeitachse zu sehen</span>
+          </div>
+        </div>
+        <ol class="tl-list" id="timelineList"><!-- generiert per JS --></ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== STIL-FINDER (interaktiv) -->
+  <section class="section stilfinder" id="stilfinder">
+    <div class="wrap">
+      <div class="section-head center" data-reveal>
+        <span class="eyebrow center">Interaktiv · Stil-Finder</span>
+        <h2 class="h2">Welcher Hochzeitsstil seid ihr?</h2>
+        <p>Drei Fragen, eine Minute — und ihr habt einen gemeinsamen Ausgangspunkt für Location, Farben und Deko. Perfekt, wenn ihr euch noch uneinig seid.</p>
+      </div>
+
+      <div class="quiz" id="quiz" data-reveal data-delay="1">
+        <div class="quiz-progress"><span id="quizProgressBar"></span></div>
+
+        <div class="quiz-stage" id="quizStage">
+          <!-- Frage 1 -->
+          <div class="quiz-step is-active" data-step="0">
+            <span class="quiz-count">Frage 1 von 3</span>
+            <h3 class="quiz-q">Wo seht ihr euch feiern?</h3>
+            <div class="quiz-opts">
+              <button type="button" class="quiz-opt" data-style="boho">Auf einer Wiese, barfuß, mit Lichterketten</button>
+              <button type="button" class="quiz-opt" data-style="klassisch">In einem prächtigen Schloss oder Saal</button>
+              <button type="button" class="quiz-opt" data-style="modern">In einer lichten Location mit klaren Linien</button>
+              <button type="button" class="quiz-opt" data-style="rustikal">In einer Scheune am Land mit Holz &amp; Kerzen</button>
+            </div>
+          </div>
+          <!-- Frage 2 -->
+          <div class="quiz-step" data-step="1">
+            <span class="quiz-count">Frage 2 von 3</span>
+            <h3 class="quiz-q">Welche Farben ziehen euch an?</h3>
+            <div class="quiz-opts">
+              <button type="button" class="quiz-opt" data-style="boho">Terrakotta, Pampasgras, warmes Beige</button>
+              <button type="button" class="quiz-opt" data-style="klassisch">Creme, Gold, tiefes Bordeaux</button>
+              <button type="button" class="quiz-opt" data-style="modern">Weiß, Schwarz, ein Hauch Grün</button>
+              <button type="button" class="quiz-opt" data-style="rustikal">Eukalyptus, Naturholz, Kerzenlicht</button>
+            </div>
+          </div>
+          <!-- Frage 3 -->
+          <div class="quiz-step" data-step="2">
+            <span class="quiz-count">Frage 3 von 3</span>
+            <h3 class="quiz-q">Wie soll sich der Abend anfühlen?</h3>
+            <div class="quiz-opts">
+              <button type="button" class="quiz-opt" data-style="boho">Locker, frei, ein bisschen Festival</button>
+              <button type="button" class="quiz-opt" data-style="klassisch">Festlich, elegant, ein großer Auftritt</button>
+              <button type="button" class="quiz-opt" data-style="modern">Stilvoll reduziert, jedes Detail kuratiert</button>
+              <button type="button" class="quiz-opt" data-style="rustikal">Herzlich, bodenständig, wie ein großes Familienfest</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ergebnis -->
+        <div class="quiz-result" id="quizResult" hidden>
+          <span class="eyebrow center">Euer Stil</span>
+          <h3 class="quiz-result-title" id="quizResultTitle"></h3>
+          <p class="quiz-result-text" id="quizResultText"></p>
+          <div class="quiz-result-meta" id="quizResultMeta"></div>
+          <div class="quiz-result-actions">
+            <a href="#kontakt" class="btn btn--gold">Diesen Stil umsetzen lassen <span class="arr">→</span></a>
+            <button type="button" class="btn btn--ghost" id="quizRestart">Test wiederholen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== SITZPLAN-PLANER (interaktiv) -->
+  <section class="section seating" id="sitzplan">
+    <div class="wrap">
+      <div class="section-head center" data-reveal>
+        <span class="eyebrow center">Interaktiv · Sitzplan-Planer</span>
+        <h2 class="h2">Der Sitzplan, der sich fast von selbst löst.</h2>
+        <p>Probiert es aus: Tippt einen Gast an, dann einen Tisch — schon sitzt er. Heikle Kombinationen (etwa die geschiedenen Großeltern) erkennen wir und warnen euch. Oder lasst die KI in einem Klick alles ordnen.</p>
+      </div>
+
+      <div class="seat-tool" data-reveal data-delay="1">
+        <div class="seat-side">
+          <h4 class="seat-h">Offene Gäste <span id="seatRemaining" class="seat-pill">0</span></h4>
+          <p class="seat-hint" id="seatHint">Gast antippen, dann einen Tisch wählen.</p>
+          <div class="seat-pool" id="seatPool"><!-- Gäste per JS --></div>
+          <div class="seat-actions">
+            <button type="button" class="btn btn--gold" id="seatAuto">✦ KI ordnet automatisch</button>
+            <button type="button" class="btn btn--ghost" id="seatReset">Zurücksetzen</button>
+          </div>
+          <p class="seat-status" id="seatStatus" aria-live="polite"></p>
+        </div>
+        <div class="seat-floor" id="seatTables"><!-- Tische per JS --></div>
       </div>
     </div>
   </section>
@@ -166,7 +348,7 @@
       <div class="section-head" data-reveal>
         <span class="eyebrow">So arbeiten wir</span>
         <h2 class="h2">In vier Schritten zur perfekten Hochzeit.</h2>
-        <p>Kein Wälzen von Checklisten, keine endlosen Telefonate. Sie führen ein Gespräch — den Rest orchestriert Maison Amoré.</p>
+        <p>Kein Wälzen von Checklisten, keine endlosen Telefonate. Ihr führt ein Gespräch — den Rest orchestriert Maison Amoré.</p>
       </div>
       <div class="steps">
         <div class="step" data-reveal>
@@ -177,58 +359,39 @@
         <div class="step" data-reveal data-delay="1">
           <b>02</b>
           <h3>Konzept</h3>
-          <p>Binnen Minuten erhalten Sie ein vollständiges Konzept: Locations, Stimmung, Budgetrahmen und einen ersten Zeitplan.</p>
+          <p>Binnen Minuten erhaltet ihr ein vollständiges Konzept: Locations, Stimmung, Budgetrahmen und einen ersten Zeitplan.</p>
         </div>
         <div class="step" data-reveal data-delay="2">
           <b>03</b>
           <h3>Umsetzung</h3>
-          <p>Wir holen Angebote ein, buchen Dienstleister, verwalten Gäste und bauen Ablaufplan und Sitzplan — Sie geben nur frei.</p>
+          <p>Wir holen Angebote ein, buchen Dienstleister, verwalten Gäste und bauen Ablauf- und Sitzplan — ihr gebt nur frei.</p>
         </div>
         <div class="step" data-reveal data-delay="3">
           <b>04</b>
           <h3>Der große Tag</h3>
-          <p>Am Hochzeitstag läuft alles nach Drehbuch. Sie genießen — wir halten im Hintergrund die Fäden zusammen.</p>
+          <p>Am Hochzeitstag läuft alles nach Drehbuch. Ihr genießt — wir halten im Hintergrund die Fäden zusammen.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========================================================== FEATURE: LOCATION -->
-  <section class="section feature">
-    <div class="wrap feature-grid">
-      <div class="feature-media" data-reveal>
-        <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=1200&q=80" alt="Romantische Hochzeitslocation im Grünen" loading="lazy" />
-        <div class="badge"><b>1.000+</b><span>geprüfte Locations in Deutschland, Österreich &amp; der Schweiz</span></div>
-      </div>
-      <div data-reveal data-delay="1">
-        <span class="eyebrow">Location-Suche</span>
-        <h2 class="h2" style="margin:1rem 0 1.4rem;">Die richtige Kulisse für Ihre Liebe.</h2>
-        <p style="color:var(--muted)">Erzählen Sie uns, wovon Sie träumen — intimes Weingut, prächtiges Schloss oder Boho-Scheune am See. Wir finden die passenden Häuser, prüfen Verfügbarkeit und Kapazität und verhandeln die Konditionen.</p>
-        <ul class="feature-list">
-          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>Persönlich kuratiert</b><p>Vorschläge passend zu Stil, Region, Gästezahl und Budget — keine endlosen Suchlisten.</p></div></li>
-          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>Verfügbarkeit in Echtzeit</b><p>Wir gleichen Ihren Wunschtermin direkt mit den Häusern ab.</p></div></li>
-          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>Besichtigungen organisiert</b><p>Termine koordiniert, Fragenkatalog vorbereitet, Angebote verglichen.</p></div></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================== FEATURE: SITZPLAN -->
-  <section class="section feature" id="sitzplan" style="background:var(--cream-deep)">
+  <!-- ========================================================== FEATURE: SITZPLAN STORY -->
+  <section class="section feature" style="background:var(--cream-deep)">
     <div class="wrap feature-grid rev">
       <div class="feature-media" data-reveal>
         <img src="https://images.unsplash.com/photo-1478146896981-b80fe463b330?auto=format&fit=crop&w=1200&q=80" alt="Elegant gedeckter Hochzeitstisch mit Sitzplan" loading="lazy" />
         <div class="badge"><b>0&nbsp;Konflikte</b><span>Der Sitzplan, der die zerstrittene Tante vom Ex-Partner fernhält.</span></div>
       </div>
       <div data-reveal data-delay="1">
-        <span class="eyebrow">Sitzplan &amp; Tischordnung</span>
-        <h2 class="h2" style="margin:1rem 0 1.4rem;">Jeder Gast am richtigen Platz.</h2>
-        <p style="color:var(--muted)">Der Sitzplan ist die hohe Kunst der Hochzeitsplanung. Maison Amoré kennt die Beziehungen, Wünsche und kleinen Spannungen Ihrer Gästeliste — und setzt jeden dorthin, wo der Abend für alle schön wird.</p>
+        <span class="eyebrow">Warum der Sitzplan so heikel ist</span>
+        <h2 class="h2" style="margin:1rem 0 1.4rem;">Die hohe Kunst, an die niemand denkt — bis es zu spät ist.</h2>
+        <p style="color:var(--muted)">Geschiedene Eltern, der Single-Cousin am „Kinder­tisch“, die beste Freundin, die niemanden kennt: Der Sitzplan entscheidet oft mehr über die Stimmung als die Band. Maison Amoré kennt die Beziehungen eurer Gästeliste und setzt jeden dorthin, wo der Abend für alle schön wird.</p>
         <ul class="feature-list">
-          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>Beziehungen berücksichtigt</b><p>Familien, Freundeskreise, Tischwünsche und „bitte nicht nebeneinander".</p></div></li>
-          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>In Sekunden umgestellt</b><p>Eine kurzfristige Absage? Der Plan ordnet sich neu, ohne dass Sie von vorn beginnen.</p></div></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>Beziehungen berücksichtigt</b><p>Familien, Freundeskreise, Tischwünsche und „bitte nicht nebeneinander“.</p></div></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>In Sekunden umgestellt</b><p>Eine kurzfristige Absage? Der Plan ordnet sich neu, ohne dass ihr von vorn beginnt.</p></div></li>
           <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg><div><b>Tischkarten &amp; Plan zum Druck</b><p>Fertige Tischkarten und ein schöner Sitzplan-Aushang auf Knopfdruck.</p></div></li>
         </ul>
+        <a href="#sitzplan" class="btn btn--ghost" style="margin-top:1.6rem">Sitzplan-Planer ausprobieren</a>
       </div>
     </div>
   </section>
@@ -250,22 +413,22 @@
     <div class="wrap">
       <div class="section-head center" data-reveal>
         <span class="eyebrow center">Stimmen unserer Paare</span>
-        <h2 class="h2">Geliebt von Brautpaaren.</h2>
+        <h2 class="h2">Von Brautpaaren geliebt.</h2>
       </div>
       <div class="quote-grid">
         <figure class="quote" data-reveal>
           <div class="stars">★★★★★</div>
-          <p>„Wir hatten das Gefühl, eine teure Planerin an unserer Seite zu haben — nur, dass sie nachts um zwei antwortete. Die Location war ein Traum.“</p>
+          <p>„Wir waren frisch verlobt und komplett überfordert. Nach dem ersten Gespräch hatten wir ein Konzept, ein Budget und drei Locations — und endlich das Gefühl, dass das machbar ist.“</p>
           <figcaption class="who"><i>L</i><div><b>Lena &amp; Marie</b><span>Schloss am Tegernsee</span></div></figcaption>
         </figure>
         <figure class="quote" data-reveal data-delay="1">
           <div class="stars">★★★★★</div>
-          <p>„Der Sitzplan allein war das Geld wert. 140 Gäste, null Drama. Niemand hat gemerkt, wie viel Diplomatie dahintersteckte.“</p>
+          <p>„Der Sitzplan allein war das Geld wert. 140 Gäste, geschiedene Eltern auf beiden Seiten, null Drama. Niemand hat gemerkt, wie viel Diplomatie dahintersteckte.“</p>
           <figcaption class="who"><i>J</i><div><b>Jonas &amp; Sophie</b><span>Weingut in der Pfalz</span></div></figcaption>
         </figure>
         <figure class="quote" data-reveal data-delay="2">
           <div class="stars">★★★★★</div>
-          <p>„Budget im Griff, Dienstleister gebucht, Zeitplan minutengenau. Wir konnten unseren Tag wirklich genießen, statt zu organisieren.“</p>
+          <p>„Budget im Griff, Dienstleister gebucht, Zeitplan minutengenau. Wir konnten unseren Tag wirklich genießen, statt zu organisieren. Beste Entscheidung neben dem Antrag.“</p>
           <figcaption class="who"><i>A</i><div><b>Amir &amp; Theresa</b><span>Scheune im Spreewald</span></div></figcaption>
         </figure>
       </div>
@@ -287,7 +450,7 @@
           <div class="plan-price"><b>€&nbsp;0</b><span>/ kostenlos starten</span></div>
           <ul>
             <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Persönliches Hochzeitskonzept</li>
-            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Budget- &amp; Checklisten-Tool</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Budget-Rechner &amp; Checklisten</li>
             <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>5 Location-Vorschläge</li>
             <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Gästeliste &amp; Einladungen</li>
           </ul>
@@ -316,7 +479,7 @@
           <ul>
             <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Alles aus „Verlobt &amp; geplant“</li>
             <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Persönlicher Concierge zusätzlich zur KI</li>
-            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Verhandlung &amp; Buchung in Ihrem Namen</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Verhandlung &amp; Buchung in eurem Namen</li>
             <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Regie &amp; Koordination am Hochzeitstag</li>
           </ul>
           <a href="#kontakt" class="btn btn--ghost">Beratung anfragen</a>
@@ -330,29 +493,33 @@
     <div class="wrap faq-grid">
       <div data-reveal>
         <span class="eyebrow">Häufige Fragen</span>
-        <h2 class="h2" style="margin-top:1rem;">Gut zu wissen.</h2>
-        <p style="color:var(--muted);margin-top:1.2rem;">Sie haben eine Frage, die hier nicht steht? Schreiben Sie uns — wir antworten in der Regel sofort.</p>
+        <h2 class="h2" style="margin-top:1rem;">Was frisch verlobte Paare uns fragen.</h2>
+        <p style="color:var(--muted);margin-top:1.2rem;">Ihr habt eine Frage, die hier nicht steht? Schreibt uns — wir antworten in der Regel sofort.</p>
       </div>
       <div data-reveal data-delay="1">
         <div class="acc-item">
-          <button class="acc-q">Ersetzt die KI wirklich einen Hochzeitsplaner?<i></i></button>
+          <button type="button" class="acc-q">Wir sind gerade erst verlobt — wann sollten wir starten?<i></i></button>
+          <div class="acc-a"><p>Am besten jetzt, ganz entspannt. Ideal sind 12 bis 15 Monate Vorlauf, weil die beliebten Locations und Fotografen früh ausgebucht sind. Aber keine Sorge: Auch kurzfristige Hochzeiten in wenigen Monaten bekommen wir zuverlässig organisiert.</p></div>
+        </div>
+        <div class="acc-item">
+          <button type="button" class="acc-q">Ersetzt die KI wirklich einen Hochzeitsplaner?<i></i></button>
           <div class="acc-a"><p>Sie übernimmt alle Aufgaben eines klassischen Planers — Recherche, Koordination, Budget, Gäste, Ablauf und Sitzplan — schneller und rund um die Uhr. Wer zusätzlich einen Menschen vor Ort möchte, wählt das Paket „Maison Privée“ mit persönlichem Concierge.</p></div>
         </div>
         <div class="acc-item">
-          <button class="acc-q">Wie findet ihr die passende Location?<i></i></button>
-          <div class="acc-a"><p>Wir gleichen Ihren Stil, Ihre Region, Gästezahl, Budget und Wunschtermin mit über 1.000 geprüften Häusern ab und schlagen Ihnen die besten Treffer inklusive Verfügbarkeit und Preisrahmen vor.</p></div>
+          <button type="button" class="acc-q">Wie verlässlich ist der Budget-Rechner?<i></i></button>
+          <div class="acc-a"><p>Er liefert eine realistische Orientierung auf Basis tausender echter Hochzeiten in DACH. Die genaue Summe hängt von euren Entscheidungen ab — sobald wir gemeinsam planen, wird daraus ein präziser, mitwachsender Kostenplan.</p></div>
         </div>
         <div class="acc-item">
-          <button class="acc-q">Wie funktioniert der intelligente Sitzplan?<i></i></button>
-          <div class="acc-a"><p>Sie hinterlegen Ihre Gäste samt Beziehungen und Wünschen. Maison Amoré erstellt daraus eine harmonische Tischordnung, vermeidet Konflikte und stellt bei Absagen alles in Sekunden neu zusammen — inklusive druckfertiger Tischkarten.</p></div>
+          <button type="button" class="acc-q">Was passiert mit unseren Gästedaten?<i></i></button>
+          <div class="acc-a"><p>Die interaktiven Tools auf dieser Seite laufen vollständig in eurem Browser — es werden keine Daten gespeichert oder versendet. In der vollen Planung verarbeiten wir Gästedaten DSGVO-konform und ausschließlich für eure Hochzeit.</p></div>
         </div>
         <div class="acc-item">
-          <button class="acc-q">Was kostet die Planung?<i></i></button>
-          <div class="acc-a"><p>Der Einstieg ist kostenlos. Die vollständige digitale Planung gibt es zum einmaligen Festpreis, ganz ohne Stundensätze. Für die persönliche Rundum-Regie buchen Sie „Maison Privée“. Alle Preise finden Sie im Bereich Pakete.</p></div>
+          <button type="button" class="acc-q">Wie funktioniert der intelligente Sitzplan?<i></i></button>
+          <div class="acc-a"><p>Ihr hinterlegt eure Gäste samt Beziehungen und Wünschen. Maison Amoré erstellt daraus eine harmonische Tischordnung, vermeidet Konflikte und stellt bei Absagen alles in Sekunden neu zusammen — inklusive druckfertiger Tischkarten. Den Mechanismus könnt ihr oben im Planer selbst ausprobieren.</p></div>
         </div>
         <div class="acc-item">
-          <button class="acc-q">Wie früh sollten wir starten?<i></i></button>
-          <div class="acc-a"><p>Je früher, desto entspannter — ideal sind 9 bis 15 Monate vorher. Aber auch kurzfristige Hochzeiten bekommen wir zuverlässig organisiert.</p></div>
+          <button type="button" class="acc-q">Was kostet die Planung selbst?<i></i></button>
+          <div class="acc-a"><p>Der Einstieg ist kostenlos. Die vollständige digitale Planung gibt es zum einmaligen Festpreis, ganz ohne Stundensätze. Für die persönliche Rundum-Regie bucht ihr „Maison Privée“. Alle Preise findet ihr im Bereich Pakete.</p></div>
         </div>
       </div>
     </div>
@@ -363,11 +530,11 @@
     <div class="cta-bg" role="img" aria-label="Brautpaar im Abendlicht" style="background-image:url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=2000&q=80')"></div>
     <div class="wrap">
       <span class="eyebrow center" data-reveal style="color:var(--gold)">Beginnen wir</span>
-      <h2 class="display" data-reveal data-delay="1" style="margin-top:1.4rem;">Erzählen Sie uns von <em>Ihrem Tag.</em></h2>
-      <p data-reveal data-delay="2">Ein kostenloses, unverbindliches Erstgespräch genügt — und Sie halten wenige Minuten später Ihr erstes Hochzeitskonzept in den Händen.</p>
+      <h2 class="display" data-reveal data-delay="1" style="margin-top:1.4rem;">Erzählt uns von <em>eurem Tag.</em></h2>
+      <p data-reveal data-delay="2">Ein kostenloses, unverbindliches Erstgespräch genügt — und ihr haltet wenige Minuten später euer erstes Hochzeitskonzept in den Händen. Genau die Ruhe, die ihr nach dem „Ja“ verdient habt.</p>
       <div class="cta-actions" data-reveal data-delay="3">
         <a href="mailto:hallo@maison-amore.de?subject=Erstgespr%C3%A4ch%20Hochzeitsplanung" class="btn btn--light">Kostenloses Erstgespräch <span class="arr">→</span></a>
-        <a href="#leistungen" class="btn btn--ghost" style="color:var(--cream)">Noch unsicher? Leistungen ansehen</a>
+        <a href="#budget" class="btn btn--ghost" style="color:var(--cream)">Erst mal das Budget checken</a>
       </div>
     </div>
   </section>
@@ -381,21 +548,21 @@
       <div class="foot-brand">
         <b>Maison Amoré</b>
         <span>KI-Hochzeitsplanung</span>
-        <p>Die Eleganz einer exklusiven Hochzeitsberatung, vereint mit einer Intelligenz, die niemals schläft — für den schönsten Tag Ihres Lebens.</p>
+        <p>Die Eleganz einer exklusiven Hochzeitsberatung, vereint mit einer Intelligenz, die niemals schläft — für den schönsten Tag eures Lebens.</p>
       </div>
       <div class="foot-col">
-        <h4>Leistungen</h4>
-        <a href="#leistungen">Location-Suche</a>
-        <a href="#leistungen">Budget &amp; Gäste</a>
-        <a href="#leistungen">Dienstleister</a>
-        <a href="#sitzplan">Sitzplan</a>
+        <h4>Tools</h4>
+        <a href="#budget">Budget-Rechner</a>
+        <a href="#timeline">Timeline-Generator</a>
+        <a href="#stilfinder">Stil-Finder</a>
+        <a href="#sitzplan">Sitzplan-Planer</a>
       </div>
       <div class="foot-col">
         <h4>Maison Amoré</h4>
+        <a href="#leistungen">Leistungen</a>
         <a href="#ablauf">So arbeiten wir</a>
         <a href="#pakete">Pakete &amp; Preise</a>
         <a href="#faq">Häufige Fragen</a>
-        <a href="#kontakt">Erstgespräch</a>
       </div>
       <div class="foot-col">
         <h4>Kontakt</h4>
